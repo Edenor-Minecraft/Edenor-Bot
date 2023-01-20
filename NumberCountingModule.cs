@@ -43,7 +43,7 @@ namespace Discord_Bot
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Error while setting up last number " + e.Message);
+                    Program.instance.logTrace("Error while setting up last number " + e.Message);
                     lastNumber = 0;
                 }
             }
@@ -56,7 +56,7 @@ namespace Discord_Bot
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Error while setting up last user " + e.Message);
+                    Program.instance.logTrace("Error while setting up last user " + e.Message);
                     lastUser = 0;
                 }
             }
@@ -81,7 +81,7 @@ namespace Discord_Bot
             catch (Exception e)
             {
                 msg.DeleteAsync();
-                Console.WriteLine(e.Message);
+                Program.instance.logTrace(e.Message);
                 return Task.CompletedTask;
             }
         }

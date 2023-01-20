@@ -8,9 +8,6 @@ using Discord;
 using Discord.Audio;
 using Discord.WebSocket;
 using System.Diagnostics;
-using YoutubeExplode;
-using YoutubeExplode.Videos;
-using YoutubeExplode.Videos.Streams;
 
 namespace Discord_Bot
 {
@@ -47,7 +44,7 @@ namespace Discord_Bot
         }
         public static async Task SendAsync(IAudioClient client, string path)
         {
-            Console.WriteLine(defaultPath);
+            Program.instance.logTrace(defaultPath);
             using (var ffmpeg = CreateStream(defaultPath))
             using (var output = ffmpeg.StandardOutput.BaseStream)
             using (var discord = client.CreatePCMStream(AudioApplication.Mixed))

@@ -167,7 +167,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error while setting up commands " + e.Message);
+                Program.instance.logTrace("Error while setting up commands " + e.Message);
             }
         }
         public static async Task onCommand(SocketSlashCommand command)

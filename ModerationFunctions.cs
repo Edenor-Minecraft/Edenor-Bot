@@ -17,7 +17,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Console.WriteLine("Failed to give role to user " + e.Message);
+                Program.instance.logTrace("Failed to give role to user " + e.Message);
                 return false;
             }
         }
@@ -31,7 +31,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Console.WriteLine("Failed to remove role from user " + e.Message);
+                Program.instance.logTrace("Failed to remove role from user " + e.Message);
                 return false;
             }
         }
@@ -46,7 +46,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Console.WriteLine("Failed to kick user " + e.Message);
+                Program.instance.logTrace("Failed to kick user " + e.Message);
                 return false;
             }
         }
@@ -62,7 +62,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Console.WriteLine("Failed to ban user " + e.Message);
+                Program.instance.logTrace("Failed to ban user " + e.Message);
                 return false;
             }
         }
@@ -77,7 +77,7 @@ namespace Discord_Bot
             }
             catch(Exception e)
             {
-                Console.WriteLine("Failed to ban user " + e.Message);
+                Program.instance.logTrace("Failed to ban user " + e.Message);
                 return false;
             }
         }
@@ -93,7 +93,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Console.WriteLine("Failed to kick user " + e.Message);
+                Program.instance.logTrace("Failed to kick user " + e.Message);
                 return false;
             }
         }
@@ -109,7 +109,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Console.WriteLine("Failed to kick user " + e.Message);
+                Program.instance.logTrace("Failed to kick user " + e.Message);
                 return false;
             }
         }
