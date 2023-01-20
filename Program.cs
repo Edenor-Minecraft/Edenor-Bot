@@ -48,12 +48,14 @@ namespace Discord_Bot
 
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
+            
 
             await Task.Delay(Timeout.Infinite);
         }
         private async Task onReady()
         {
             logTrace("Ready to work, bitches!");
+           // await client.SetActivityAsync();
             await client.SetGameAsync("Эденор!", null, ActivityType.Listening);
             edenor = client.CurrentUser.MutualGuilds.First(); //Easy access to edenor guild
             CommandsHandler.setupCommands();

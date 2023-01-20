@@ -96,7 +96,7 @@ namespace Discord_Bot
                 locale.Add("ru", "датьроль");
                 giveRole.WithName("giverole");
                 giveRole.WithNameLocalizations(locale);
-                giveRole.WithDescription("Превращает человека в ошибку");
+                giveRole.WithDescription("Изменить роль человека");
                 giveRole.WithDefaultMemberPermissions(GuildPermission.Administrator);
                 giveRole.AddOption("user", ApplicationCommandOptionType.User, "Человек, которому надо дать роль", true);
                 giveRole.AddOption("role", ApplicationCommandOptionType.Role, "Роль, которую надо выдать", true);
@@ -180,10 +180,20 @@ namespace Discord_Bot
                 locale.Add("ru", "перезагрузитьданныетаблицы");
                 refreshGoogleSheetData.WithName("refreshgooglesheetdata");
                 refreshGoogleSheetData.WithNameLocalizations(locale);
-                refreshGoogleSheetData.WithDescription("Превращает человека в ошибку");
+                refreshGoogleSheetData.WithDescription("Принудительно перезагружает данные таблицы вайт листа");
                 refreshGoogleSheetData.WithDefaultMemberPermissions(GuildPermission.Administrator);
                 locale.Clear();
                 applicationCommandProperties.Add(refreshGoogleSheetData.Build());
+
+                var acceptNotification = new SlashCommandBuilder();
+                locale.Add("ru", "уведомление");
+                acceptNotification.WithName("acceptnotification");
+                acceptNotification.WithNameLocalizations(locale);
+                acceptNotification.WithDescription("Уведомляет человека о том, что его заявка принята");
+                acceptNotification.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                acceptNotification.AddOption("user", ApplicationCommandOptionType.User, "Человек, которому надо дать роль", true);
+                locale.Clear();
+                applicationCommandProperties.Add(acceptNotification.Build());
 
                 await Program.instance.client.BulkOverwriteGlobalApplicationCommandsAsync(applicationCommandProperties.ToArray());
             }
@@ -199,29 +209,46 @@ namespace Discord_Bot
             Embed[] embeds = new Embed[1];
             switch (command.CommandName)
             {
+                case "acceptnotification":
+                    embed.Title = "Здравствуйте, ваша заявка на сервер была одобрена!";
+                    embed.Author.IconUrl = "https://sun7-16.userapi.com/impg/Rjb4mZYT_1Je6qzdgGm3gvCNDLCTmuCLj3qxQA/gJsPNJDwC2Y.jpg?size=1000x1000&quality=96&sign=a3c8cd1edbf9776f4fe989dea40534dd&type=album";
+                    embed.Author.Name = "Эденор";
+                    embed.Author.Url = "https://edenor.ru/";
+                    embed.Footer.Text = "Приятной игры!";
+                    embed.Footer.IconUrl = "https://sun7-16.userapi.com/impg/Rjb4mZYT_1Je6qzdgGm3gvCNDLCTmuCLj3qxQA/gJsPNJDwC2Y.jpg?size=1000x1000&quality=96&sign=a3c8cd1edbf9776f4fe989dea40534dd&type=album";
+                    try
+                    {
+                        Program.instance.client.GetUser(((IUser)options[0].Value).Id).SendMessageAsync("", false, embed.Build());
+                        command.RespondAsync("Успешно уведомили участника о принятии на приватку!");
+                    }
+                    catch(Exception e)
+                    {
+                        command.RespondAsync("Не смогли уведомить человека о принятии на приватку. \nКод ошибки: " + e.Message);
+                    }
+                    break;
                 case "giverole":
                     if (!(bool)options[2])
                     {
                         try
                         {
-                            ModerationFunctions.giveRole(Program.instance.edenor.GetUser(Convert.ToUInt64(options[0].Value.ToString())), Convert.ToInt64(options[1].Value.ToString()));
-                            command.RespondAsync("Успешно выдали роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].Value.ToString())) + " участнику " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].Value.ToString())));
+                            ModerationFunctions.giveRole((IUser)options[0].Value, (long)((IRole)options[1].Value).Id);
+                            command.RespondAsync("Успешно выдали роль " + MentionUtils.MentionRole(((IRole)options[1].Value).Id) + " участнику " + MentionUtils.MentionUser(((IUser)options[0].Value).Id));
                         }
                         catch(Exception e)
                         {
-                            command.RespondAsync("Не удалось выдать роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].Value.ToString())) + " участнику " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].Value.ToString())));
+                            command.RespondAsync("Не удалось выдать роль " + MentionUtils.MentionRole(((IRole)options[1].Value).Id) + " участнику " + MentionUtils.MentionUser(((IUser)options[0].Value).Id));
                         }
                     }
                     else
                     {
                         try
                         {
-                            ModerationFunctions.removeRole(Program.instance.edenor.GetUser(Convert.ToUInt64(options[0].Value.ToString())), Convert.ToInt64(options[1].Value.ToString()));
-                            command.RespondAsync("Успешно забрали роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].Value.ToString())) + " с участника " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].Value.ToString())));
+                            ModerationFunctions.removeRole((IUser)options[0].Value, (long)((IRole)options[1].Value).Id);
+                            command.RespondAsync("Успешно забрали роль " + MentionUtils.MentionRole(((IRole)options[1].Value).Id) + " с участника " + MentionUtils.MentionUser(((IUser)options[0].Value).Id));
                         }
                         catch (Exception e)
                         {
-                            command.RespondAsync("Не удалось забрать роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].Value.ToString())) + " у участника " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].Value.ToString())));
+                            command.RespondAsync("Не удалось забрать роль " + MentionUtils.MentionRole(((IRole)options[1].Value).Id) + " у участника " + MentionUtils.MentionUser(((IUser)options[0].Value).Id));
                         }
                     }
                     break;
