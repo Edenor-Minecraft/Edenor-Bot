@@ -98,7 +98,21 @@ namespace Discord_Bot
                                 accepted = true;
                             }
                         }
-                        try { if (discordAccountsList.ContainsKey(row[2].ToString())) { gridRow += 1; continue; } } catch (Exception e) { gridRow += 1; Program.instance.logTrace(e.Message); continue; }
+                        try { if (discordAccountsList.ContainsKey(row[2].ToString())) {
+                                /*var existingDiscordRow = discordColumn.RowData.ElementAt(gridRow).Values.GetEnumerator();
+                                var cellIndex = 0;
+                                while (existingDiscordRow.MoveNext())
+                                {
+                                    var curCell = existingDiscordRow.Current;
+                                    curCell.UserEnteredFormat.BackgroundColorStyle.RgbColor.Green = 1;
+                                    curCell.UserEnteredFormat.BackgroundColorStyle.RgbColor.Red = 1;
+                                    curCell.UserEnteredFormat.BackgroundColorStyle.RgbColor.Blue = 0;
+                                    cellIndex += 1;
+                                }*/
+                                gridRow += 1; 
+                                continue; 
+                            }
+                        } catch (Exception e) { gridRow += 1; Program.instance.logTrace(e.Message); continue; }
 
                         discordAccountsList.Add(row[2].ToString(), accepted);
                         minecraftAccountsList.Add(row[2].ToString(), row[3].ToString());

@@ -204,24 +204,24 @@ namespace Discord_Bot
                     {
                         try
                         {
-                            ModerationFunctions.giveRole(Program.instance.edenor.GetUser(Convert.ToUInt64(options[0].ToString())), Convert.ToInt64(options[1].ToString()));
-                            command.RespondAsync("Успешно выдали роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].ToString())) + " участнику " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].ToString())));
+                            ModerationFunctions.giveRole(Program.instance.edenor.GetUser(Convert.ToUInt64(options[0].Value.ToString())), Convert.ToInt64(options[1].Value.ToString()));
+                            command.RespondAsync("Успешно выдали роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].Value.ToString())) + " участнику " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].Value.ToString())));
                         }
                         catch(Exception e)
                         {
-                            command.RespondAsync("Не удалось выдать роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].ToString())) + " участнику " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].ToString())));
+                            command.RespondAsync("Не удалось выдать роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].Value.ToString())) + " участнику " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].Value.ToString())));
                         }
                     }
                     else
                     {
                         try
                         {
-                            ModerationFunctions.removeRole(Program.instance.edenor.GetUser(Convert.ToUInt64(options[0].ToString())), Convert.ToInt64(options[1].ToString()));
-                            command.RespondAsync("Успешно забрали роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].ToString())) + " с участника " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].ToString())));
+                            ModerationFunctions.removeRole(Program.instance.edenor.GetUser(Convert.ToUInt64(options[0].Value.ToString())), Convert.ToInt64(options[1].Value.ToString()));
+                            command.RespondAsync("Успешно забрали роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].Value.ToString())) + " с участника " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].Value.ToString())));
                         }
                         catch (Exception e)
                         {
-                            command.RespondAsync("Не удалось забрать роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].ToString())) + " у участника " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].ToString())));
+                            command.RespondAsync("Не удалось забрать роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].Value.ToString())) + " у участника " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].Value.ToString())));
                         }
                     }
                     break;
