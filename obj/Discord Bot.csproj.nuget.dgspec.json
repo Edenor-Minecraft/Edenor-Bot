@@ -51,10 +51,6 @@
             "Google.Apis.Sheets.v4": {
               "target": "Package",
               "version": "[1.58.0.2909, )"
-            },
-            "YoutubeExplode": {
-              "target": "Package",
-              "version": "[6.2.5, )"
             }
           },
           "imports": [

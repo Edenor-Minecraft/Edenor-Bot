@@ -32,6 +32,4 @@ E:\Discord Bot\Discord Bot\bin\Debug\net5.0\Google.Apis.Auth.dll
 E:\Discord Bot\Discord Bot\bin\Debug\net5.0\Google.Apis.Core.dll
 E:\Discord Bot\Discord Bot\bin\Debug\net5.0\Google.Apis.Sheets.v4.dll
 E:\Discord Bot\Discord Bot\bin\Debug\net5.0\client_secret.json
-E:\Discord Bot\Discord Bot\bin\Debug\net5.0\ffmpeg\ffmpeg.exe
-E:\Discord Bot\Discord Bot\bin\Debug\net5.0\AngleSharp.dll
-E:\Discord Bot\Discord Bot\bin\Debug\net5.0\YoutubeExplode.dll
+E:\Discord Bot\Discord Bot\bin\Debug\net5.0\config.json

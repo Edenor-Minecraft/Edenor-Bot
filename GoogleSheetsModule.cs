@@ -40,7 +40,7 @@ namespace Discord_Bot
 
         public static void timer(object stateInfo)
         {
-            Console.WriteLine("Refreshed discord accounts infos");
+            Program.instance.logTrace("Refreshed discord accounts infos");
             ReadEntries();
         }
 
@@ -89,7 +89,7 @@ namespace Discord_Bot
                             accepted = true;
                         }
                     }
-                    try { if (discordAccountsList.ContainsKey(row[2].ToString())) { gridRow += 1; continue; } }catch(Exception e) { gridRow += 1; Console.WriteLine(e.Message); continue; }
+                    try { if (discordAccountsList.ContainsKey(row[2].ToString())) { gridRow += 1; continue; } }catch(Exception e) { gridRow += 1; Program.instance.logTrace(e.Message); continue; }
 
                     discordAccountsList.Add(row[2].ToString(), accepted);
                     minecraftAccountsList.Add(row[2].ToString(), row[3].ToString());
@@ -97,7 +97,7 @@ namespace Discord_Bot
             }
             else
             {
-                Console.WriteLine("No data found.");
+                Program.instance.logTrace("No data found.");
             }
         }
 
@@ -109,7 +109,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                Program.instance.logTrace(e.Message);
                 return false;
             }
         }

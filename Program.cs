@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using System.Linq;
+using System.Text.Json;
+using System.IO;
 
 namespace Discord_Bot
 {
@@ -15,6 +17,8 @@ namespace Discord_Bot
         static Timer googleTimer = new Timer(GoogleSheetsHelper.timer, new AutoResetEvent(true), 1000, 1800000);
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
+
+        static string configDir = (Environment.CurrentDirectory + "/config.json");
 
         public Program()
         {
@@ -37,7 +41,10 @@ namespace Discord_Bot
 
         private async Task MainAsync()
         {
-            var token = "NzEwNDAxNzg1NjYzMTkzMTU4.G9cbFN.RTMyDR2WJ6pjTZQKacHRgIRWpEG-CoOi4fRHsk";
+            using FileStream stream = File.OpenRead(configDir);
+            BotConfig config = await JsonSerializer.DeserializeAsync<BotConfig>(stream);
+
+            var token = config.token;
 
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
@@ -46,7 +53,7 @@ namespace Discord_Bot
         }
         private async Task onReady()
         {
-            Console.WriteLine("Ready to work, bitches!");
+            logTrace("Ready to work, bitches!");
             await client.SetGameAsync("Эденор!", null, ActivityType.Listening);
             edenor = client.CurrentUser.MutualGuilds.First(); //Easy access to edenor guild
             CommandsHandler.setupCommands();
@@ -54,7 +61,7 @@ namespace Discord_Bot
 
         private Task Log(LogMessage arg)
         {
-            Console.WriteLine(arg.ToString());
+            logTrace(arg.ToString());
             return Task.CompletedTask;
         }
         private Task MessagesHandler(SocketMessage msg)
@@ -94,5 +101,14 @@ namespace Discord_Bot
             }
         }
 
+        public async Task logTrace(string msg)
+        {
+            await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync(msg);
+        }
+    }
+
+    class BotConfig
+    {
+        public string token { get; set; }
     }
 }
