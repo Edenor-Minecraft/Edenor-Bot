@@ -87,9 +87,22 @@ namespace Discord_Bot
                 secretCommand.WithName("error");
                 secretCommand.WithNameLocalizations(locale);
                 secretCommand.WithDescription("Превращает человека в ошибку");
+                secretCommand.WithDefaultMemberPermissions(GuildPermission.Administrator);
                 secretCommand.AddOption("take", ApplicationCommandOptionType.Boolean, "Забрать роль?", true);
                 locale.Clear();
                 //applicationCommandProperties.Add(secretCommand.Build());
+
+                var giveRole = new SlashCommandBuilder();
+                locale.Add("ru", "датьроль");
+                giveRole.WithName("giverole");
+                giveRole.WithNameLocalizations(locale);
+                giveRole.WithDescription("Превращает человека в ошибку");
+                giveRole.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                giveRole.AddOption("user", ApplicationCommandOptionType.User, "Человек, которому надо дать роль", true);
+                giveRole.AddOption("role", ApplicationCommandOptionType.Role, "Роль, которую надо выдать", true);
+                giveRole.AddOption("take", ApplicationCommandOptionType.Boolean, "Забрать роль?", true);
+                locale.Clear();
+                applicationCommandProperties.Add(giveRole.Build());
 
                 var selfban = new SlashCommandBuilder();
                 locale.Add("ru", "самобан");
@@ -163,6 +176,15 @@ namespace Discord_Bot
                 locale.Clear();
                 //applicationCommandProperties.Add(join.Build());
 
+                var refreshGoogleSheetData = new SlashCommandBuilder();
+                locale.Add("ru", "перезагрузитьданныетаблицы");
+                refreshGoogleSheetData.WithName("refreshgooglesheetdata");
+                refreshGoogleSheetData.WithNameLocalizations(locale);
+                refreshGoogleSheetData.WithDescription("Превращает человека в ошибку");
+                refreshGoogleSheetData.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                locale.Clear();
+                applicationCommandProperties.Add(refreshGoogleSheetData.Build());
+
                 await Program.instance.client.BulkOverwriteGlobalApplicationCommandsAsync(applicationCommandProperties.ToArray());
             }
             catch (Exception e)
@@ -177,6 +199,44 @@ namespace Discord_Bot
             Embed[] embeds = new Embed[1];
             switch (command.CommandName)
             {
+                case "giverole":
+                    if (!(bool)options[2])
+                    {
+                        try
+                        {
+                            ModerationFunctions.giveRole(Program.instance.edenor.GetUser(Convert.ToUInt64(options[0].ToString())), Convert.ToInt64(options[1].ToString()));
+                            command.RespondAsync("Успешно выдали роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].ToString())) + " участнику " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].ToString())));
+                        }
+                        catch(Exception e)
+                        {
+                            command.RespondAsync("Не удалось выдать роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].ToString())) + " участнику " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].ToString())));
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            ModerationFunctions.removeRole(Program.instance.edenor.GetUser(Convert.ToUInt64(options[0].ToString())), Convert.ToInt64(options[1].ToString()));
+                            command.RespondAsync("Успешно забрали роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].ToString())) + " с участника " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].ToString())));
+                        }
+                        catch (Exception e)
+                        {
+                            command.RespondAsync("Не удалось забрать роль " + MentionUtils.MentionRole(Convert.ToUInt64(options[1].ToString())) + " у участника " + MentionUtils.MentionUser(Convert.ToUInt64(options[0].ToString())));
+                        }
+                    }
+                    break;
+                case "refreshgooglesheetdata":
+                    try 
+                    { 
+                        GoogleSheetsHelper.timer(null);
+                        command.RespondAsync("Успешно перезагрузили данные таблицы");
+                    } 
+                    catch (Exception e) 
+                    { 
+                        Program.instance.logTrace(e.Message);
+                        command.RespondAsync("Не удалось перезагрузить данные таблицы");
+                    }
+                    break;
                 /*case "join":
                     await MusicModule.onCommand(command);
                     break;
