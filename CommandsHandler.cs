@@ -227,7 +227,7 @@ namespace Discord_Bot
                     }
                     break;
                 case "giverole":
-                    if (((IUser)options[0].Value).Id == 324794944042565643 && command.User.Id != 324794944042565643) { command.RespondAsync("Невозможно изменить роль великому Альтрону!"; break; }
+                    if (((IUser)options[0].Value).Id == 324794944042565643 && command.User.Id != 324794944042565643) { command.RespondAsync("Невозможно изменить роль великому Альтрону!"); break; }
                     if (!(bool)options[2])
                     {
                         try
