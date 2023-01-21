@@ -114,12 +114,9 @@ namespace Discord_Bot
                             }
                         } catch (Exception e) { gridRow += 1; Program.instance.logTrace(e.Message); continue; }
 
-                        Program.instance.logTrace(row[2].ToString());
-                        Program.instance.logTrace(row[3].ToString());
-                        Program.instance.logTrace(accepted.ToString());
-
                         discordAccountsList.Add(row[2].ToString(), accepted);
                         minecraftAccountsList.Add(row[2].ToString(), row[3].ToString());
+                        gridRow += 1;
                     }
                 }
                 else
