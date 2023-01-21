@@ -83,7 +83,10 @@ namespace Discord_Bot
                 }
                 else
                 {
-                    msg.DeleteAsync();
+                    if (msg.Author.Id != 710401785663193158)
+                    {
+                        msg.DeleteAsync();
+                    }
                     return Task.CompletedTask;
                 }
             }
