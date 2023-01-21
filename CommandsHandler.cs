@@ -211,11 +211,17 @@ namespace Discord_Bot
             {
                 case "acceptnotification":
                     embed.Title = "Здравствуйте, ваша заявка на сервер была одобрена!";
-                    embed.Author.IconUrl = "https://sun7-16.userapi.com/impg/Rjb4mZYT_1Je6qzdgGm3gvCNDLCTmuCLj3qxQA/gJsPNJDwC2Y.jpg?size=1000x1000&quality=96&sign=a3c8cd1edbf9776f4fe989dea40534dd&type=album";
-                    embed.Author.Name = "Эденор";
-                    embed.Author.Url = "https://edenor.ru/";
-                    embed.Footer.Text = "Приятной игры!";
-                    embed.Footer.IconUrl = "https://sun7-16.userapi.com/impg/Rjb4mZYT_1Je6qzdgGm3gvCNDLCTmuCLj3qxQA/gJsPNJDwC2Y.jpg?size=1000x1000&quality=96&sign=a3c8cd1edbf9776f4fe989dea40534dd&type=album";
+                    embed.Description = "Советую ознакомиться с правилами на сайте! \nАйпи сервера: \nJava - mc.edenor.ru или play.edenor.ru \nBedrock - pe.edenor.ru(порт 25565)";
+                    embed.WithColor(new Color(0, 255, 255));
+                    var author = new EmbedAuthorBuilder();
+                    author.Name = "Эденор";
+                    author.IconUrl = "https://sun7-16.userapi.com/impg/Rjb4mZYT_1Je6qzdgGm3gvCNDLCTmuCLj3qxQA/gJsPNJDwC2Y.jpg?size=1000x1000&quality=96&sign=a3c8cd1edbf9776f4fe989dea40534dd&type=album";
+                    author.Url = "https://edenor.ru/";
+                    embed.WithAuthor(author);
+                    var footer = new EmbedFooterBuilder();
+                    footer.Text = "Приятной игры!";
+                    footer.IconUrl = "https://sun7-16.userapi.com/impg/Rjb4mZYT_1Je6qzdgGm3gvCNDLCTmuCLj3qxQA/gJsPNJDwC2Y.jpg?size=1000x1000&quality=96&sign=a3c8cd1edbf9776f4fe989dea40534dd&type=album";
+                    embed.WithFooter(footer);
                     try
                     {
                         Program.instance.client.GetUser(((IUser)options[0].Value).Id).SendMessageAsync("", false, embed.Build());
