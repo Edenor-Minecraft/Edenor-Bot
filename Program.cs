@@ -24,7 +24,8 @@ namespace Discord_Bot
         {
             var config = new DiscordSocketConfig
             {
-                GatewayIntents = GatewayIntents.All
+                GatewayIntents = GatewayIntents.All,
+                MessageCacheSize = 50
             };
 
             client = new DiscordSocketClient(config);
@@ -120,11 +121,19 @@ namespace Discord_Bot
 
         private Task onMessageDeleted(Cacheable<IMessage, ulong> arg1, Cacheable<IMessageChannel, ulong> arg2)
         {
-            if (arg2.Value.Id == 1062273336354275348)
+            try
             {
-                NumberCountingModule.onMessageDeleted(arg1.Value, arg2.Value);
+                if (arg2.Value.Id == 1062273336354275348)
+                {
+                    NumberCountingModule.onMessageDeleted(arg1.Value, arg2.Value);
+                }
+                return Task.CompletedTask;
             }
-            return Task.CompletedTask;
+            catch (Exception e)
+            {
+                logError(e.Message);
+                return Task.CompletedTask;
+            }
         }
 
         private static string Timestamp => $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}";
