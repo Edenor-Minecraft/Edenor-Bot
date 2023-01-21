@@ -33,6 +33,15 @@ namespace Discord_Bot
             }
         }
 
+        public static Task onMessageDeleted(IMessage msg, IMessageChannel channel)
+        {
+            if (Convert.ToInt64(msg.Content) == lastNumber)
+            {
+                ((SocketTextChannel)Program.instance.edenor.GetChannel(channel.Id)).SendMessageAsync($"Число {msg.Content}, отправленное {msg.Author.Username}, было удалено. Следующее число - {Convert.ToInt64(msg.Content) + 1}");
+            }
+            return Task.CompletedTask;        
+        }
+
         public static Task doWork(SocketMessage msg)
         {
             if (lastNumber == 0)
@@ -43,7 +52,7 @@ namespace Discord_Bot
                 }
                 catch (Exception e)
                 {
-                    Program.instance.logTrace("Error while setting up last number " + e.Message);
+                    Program.instance.logError("Error while setting up last number " + e.Message);
                     lastNumber = 0;
                 }
             }
@@ -56,7 +65,7 @@ namespace Discord_Bot
                 }
                 catch (Exception e)
                 {
-                    Program.instance.logTrace("Error while setting up last user " + e.Message);
+                    Program.instance.logError("Error while setting up last user " + e.Message);
                     lastUser = 0;
                 }
             }
@@ -81,7 +90,7 @@ namespace Discord_Bot
             catch (Exception e)
             {
                 msg.DeleteAsync();
-                Program.instance.logTrace(e.Message);
+                Program.instance.logError(e.Message);
                 return Task.CompletedTask;
             }
         }

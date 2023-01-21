@@ -33,12 +33,12 @@ namespace Discord_Bot
             client.Ready += onReady;
             client.SlashCommandExecuted += CommandsHandler.onCommand;
             client.ButtonExecuted += ButtonsHandler.onButton;
+            client.MessageDeleted += onMessageDeleted;
 
             GoogleSheetsHelper.setupHelper();
 
             instance = this;
         }
-
         private async Task MainAsync()
         {
             using FileStream stream = File.OpenRead(configDir);
@@ -55,15 +55,31 @@ namespace Discord_Bot
         private async Task onReady()
         {
             logTrace("Ready to work, bitches!");
-           // await client.SetActivityAsync();
-            await client.SetGameAsync("Эденор!", null, ActivityType.Listening);
+            await client.SetActivityAsync(new StreamingGame("Эденор", "https://edenor.ru/"));
             edenor = client.CurrentUser.MutualGuilds.First(); //Easy access to edenor guild
             CommandsHandler.setupCommands();
         }
 
         private Task Log(LogMessage arg)
         {
-            logTrace(arg.ToString());
+            switch (arg.Severity)
+            {
+                case LogSeverity.Critical:
+                    logCritical(arg.ToString());
+                    break;
+                case LogSeverity.Error:
+                    logError(arg.ToString());
+                    break;
+                case LogSeverity.Warning:
+                    logWarn(arg.ToString());
+                    break;
+                case LogSeverity.Info:
+                    logInfo(arg.ToString());
+                    break;
+                default:
+                    logTrace(arg.ToString());
+                    break;
+            }
             return Task.CompletedTask;
         }
         private Task MessagesHandler(SocketMessage msg)
@@ -103,9 +119,38 @@ namespace Discord_Bot
             }
         }
 
+        private Task onMessageDeleted(Cacheable<IMessage, ulong> arg1, Cacheable<IMessageChannel, ulong> arg2)
+        {
+            if (arg2.Value.Id == 1062273336354275348)
+            {
+                NumberCountingModule.onMessageDeleted(arg1.Value, arg2.Value);
+            }
+            return Task.CompletedTask;
+        }
+
+        private static string Timestamp => $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}";
         public async Task logTrace(string msg)
         {
-            await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync(msg);
+            await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [TRACE] :  {msg}");
+        }
+
+        public async Task logError(string msg)
+        {
+            await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [ERROR] :  {msg}");
+        }
+
+        public async Task logInfo(string msg)
+        {
+            await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [INFO] :  {msg}");
+        }
+
+        public async Task logWarn(string msg)
+        {
+            await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [WARN] :  {msg}");
+        }
+        public async Task logCritical (string msg)
+        {
+            await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [CRITICAL ERROR] :  {msg}");
         }
     }
 

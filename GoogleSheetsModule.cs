@@ -41,13 +41,13 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Program.instance.logTrace(e.Message);
+                Program.instance.logError(e.Message);
             }
         }
 
         public static void timer(object stateInfo)
         {
-            Program.instance.logTrace("Refreshed discord accounts infos");
+            Program.instance.logInfo("Refreshed discord accounts infos");
             ReadEntries();
         }
 
@@ -114,18 +114,22 @@ namespace Discord_Bot
                             }
                         } catch (Exception e) { gridRow += 1; Program.instance.logTrace(e.Message); continue; }
 
+                        Program.instance.logTrace(row[2].ToString());
+                        Program.instance.logTrace(row[3].ToString());
+                        Program.instance.logTrace(accepted.ToString());
+
                         discordAccountsList.Add(row[2].ToString(), accepted);
                         minecraftAccountsList.Add(row[2].ToString(), row[3].ToString());
                     }
                 }
                 else
                 {
-                    Program.instance.logTrace("No data found.");
+                    Program.instance.logError("No data found.");
                 }
             }
             catch(Exception e)
             {
-                Program.instance.logTrace(e.Message);
+                Program.instance.logError(e.Message);
             }
         }
 
@@ -137,7 +141,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Program.instance.logTrace(e.Message);
+                Program.instance.logError(e.Message);
                 return false;
             }
         }

@@ -199,7 +199,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Program.instance.logTrace("Error while setting up commands " + e.Message);
+                Program.instance.logError("Error while setting up commands " + e.Message);
             }
         }
         public static async Task onCommand(SocketSlashCommand command)
