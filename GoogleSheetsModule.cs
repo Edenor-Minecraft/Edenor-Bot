@@ -17,7 +17,7 @@ namespace Discord_Bot
     class GoogleSheetsHelper
     {
         static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
-        static readonly string ApplicationName = "Current Legislators";
+        static readonly string ApplicationName = "Edenor Bot";
         static readonly string SpreadsheetId = "1XYpSVHGBwe4PMlp1sWZBFW2ciIORqUjhxAAlqymicj4";
         static readonly string sheet = "Ответы на форму (1)";
         static SheetsService service;

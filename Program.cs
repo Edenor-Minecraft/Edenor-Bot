@@ -84,7 +84,7 @@ namespace Discord_Bot
         }
         private Task MessagesHandler(SocketMessage msg)
         {
-            if (msg.Author.Id == 941460895912034335)
+            if (msg.Author.Id == 941460895912034335 && msg.Channel.Id == 1055783105916571658)
             {
                 var enumerator = msg.Embeds.GetEnumerator();
                 while (enumerator.MoveNext())

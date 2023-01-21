@@ -204,7 +204,7 @@ namespace Discord_Bot
         }
         public static async Task onCommand(SocketSlashCommand command)
         {
-            if (command.GuildId == null) {command.RespondAsync("Нельзя использовать команды в личных сообщениях!");}
+            if (command.GuildId == null) {command.RespondAsync("Нельзя использовать команды в личных сообщениях!"); return;}
             var options = command.Data.Options.ToArray();
             var embed = new EmbedBuilder(); 
             Embed[] embeds = new Embed[1];
