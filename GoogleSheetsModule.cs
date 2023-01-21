@@ -55,8 +55,8 @@ namespace Discord_Bot
         static IDictionary<string, string> minecraftAccountsList = new Dictionary<string, string>();
         private static void ReadEntries()
         {
-            try
-            {
+           try
+           {
                 discordAccountsList.Clear();
                 minecraftAccountsList.Clear();
                 var range = $"{sheet}!A:F";
@@ -89,30 +89,11 @@ namespace Discord_Bot
                     {
                         if (gridRow > values.Count - 1) { break; }
                         bool accepted = false;
-                        if (discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle != null)
+                        if (discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat != null)
                         {
-                            if (discordColumn.RowData.ElementAt(gridRow).Values.First().UserEnteredFormat.BackgroundColorStyle.RgbColor.Blue == 0.30980393
-                                && discordColumn.RowData.ElementAt(gridRow).Values.First().UserEnteredFormat.BackgroundColorStyle.RgbColor.Green == 0.65882355
-                                && discordColumn.RowData.ElementAt(gridRow).Values.First().UserEnteredFormat.BackgroundColorStyle.RgbColor.Red == 0.41568628)
-                            {
-                                accepted = true;
-                            }
-                        }
-                        try { if (discordAccountsList.ContainsKey(row[2].ToString())) {
-                                /*var existingDiscordRow = discordColumn.RowData.ElementAt(gridRow).Values.GetEnumerator();
-                                var cellIndex = 0;
-                                while (existingDiscordRow.MoveNext())
-                                {
-                                    var curCell = existingDiscordRow.Current;
-                                    curCell.UserEnteredFormat.BackgroundColorStyle.RgbColor.Green = 1;
-                                    curCell.UserEnteredFormat.BackgroundColorStyle.RgbColor.Red = 1;
-                                    curCell.UserEnteredFormat.BackgroundColorStyle.RgbColor.Blue = 0;
-                                    cellIndex += 1;
-                                }*/
-                                gridRow += 1; 
-                                continue; 
-                            }
-                        } catch (Exception e) { gridRow += 1; Program.instance.logTrace(e.Message); continue; }
+                            accepted = checkColor(discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Red.GetValueOrDefault(1), discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Blue.GetValueOrDefault(1), discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Green.GetValueOrDefault(1));
+                        }                       
+                        try { if (discordAccountsList.ContainsKey(row[2].ToString())) {gridRow += 1; continue; }} catch (Exception e) { gridRow += 1; Program.instance.logTrace(e.Message); continue; }
 
                         discordAccountsList.Add(row[2].ToString(), accepted);
                         minecraftAccountsList.Add(row[2].ToString(), row[3].ToString());
@@ -123,10 +104,22 @@ namespace Discord_Bot
                 {
                     Program.instance.logError("No data found.");
                 }
-            }
-            catch(Exception e)
+           }
+           catch(Exception e)
+           {
+               Program.instance.logError(e.Message);
+           }
+        }
+
+        private static Boolean checkColor(float red, float blue, float green)
+        {
+            if (Math.Round(red, 1, MidpointRounding.AwayFromZero) == 0.4 && Math.Round(blue, 1, MidpointRounding.AwayFromZero) == 0.3 && Math.Round(green, 1, MidpointRounding.AwayFromZero) == 0.7)
             {
-                Program.instance.logError(e.Message);
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 

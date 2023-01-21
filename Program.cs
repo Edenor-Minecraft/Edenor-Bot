@@ -49,7 +49,6 @@ namespace Discord_Bot
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
             
-
             await Task.Delay(Timeout.Infinite);
         }
         private async Task onReady()
