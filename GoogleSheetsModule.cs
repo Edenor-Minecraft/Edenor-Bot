@@ -95,8 +95,8 @@ namespace Discord_Bot
                         }                       
                         try { if (discordAccountsList.ContainsKey(row[2].ToString())) {gridRow += 1; continue; }} catch (Exception e) { gridRow += 1; Program.instance.logTrace(e.Message); continue; }
 
-                        discordAccountsList.Add(row[2].ToString(), accepted);
-                        minecraftAccountsList.Add(row[2].ToString(), row[3].ToString());
+                        discordAccountsList.Add(row[3].ToString(), accepted);
+                        //minecraftAccountsList.Add(row[2].ToString(), row[3].ToString());
                         gridRow += 1;
                     }
                 }
@@ -123,11 +123,11 @@ namespace Discord_Bot
             }
         }
 
-        public static Boolean checkAccepted(string discordNick, string minecraftNick)
+        public static Boolean checkAccepted(/*string discordNick,*/ string minecraftNick)
         {
             try
             {
-                return discordAccountsList[discordNick] && minecraftAccountsList[discordNick].Equals(minecraftNick);
+                return discordAccountsList[/*discordNick*/minecraftNick]/* && minecraftAccountsList[discordNick].Equals(minecraftNick)*/;
             }
             catch (Exception e)
             {

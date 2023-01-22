@@ -89,7 +89,7 @@ namespace Discord_Bot
                 var enumerator = msg.Embeds.GetEnumerator();
                 while (enumerator.MoveNext())
                 {
-                    if (GoogleSheetsHelper.checkAccepted(enumerator.Current.Author.Value.Name, enumerator.Current.Fields[0].Value))
+                    if (GoogleSheetsHelper.checkAccepted(/*enumerator.Current.Author.Value.Name, */enumerator.Current.Fields[0].Value))
                     {
                         var globalUser = client.GetUser(Convert.ToUInt64(enumerator.Current.Footer.Value.Text));
                         SocketGuild edenGuild = globalUser.MutualGuilds.ElementAt(0);
@@ -114,9 +114,8 @@ namespace Discord_Bot
             {
                 return NumberCountingModule.doWork(msg);
             }
-            else {
-                return Task.CompletedTask;
-            }
+
+            return Task.CompletedTask;
         }
 
         private Task onMessageDeleted(Cacheable<IMessage, ulong> arg1, Cacheable<IMessageChannel, ulong> arg2)
@@ -164,6 +163,6 @@ namespace Discord_Bot
 
     class BotConfig
     {
-        public string token { get; set; }
+        public string token { get;}
     }
 }
