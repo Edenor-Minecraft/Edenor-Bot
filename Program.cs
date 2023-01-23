@@ -25,6 +25,8 @@ namespace Discord_Bot
 
         private BotConfig config = null;
 
+        public MusicModule musicModule;
+
         public Program()
         {
             instance = this;

@@ -1,4 +1,6 @@
-﻿namespace Discord_Bot
+﻿using System.Threading.Channels;
+
+namespace Discord_Bot
 {
     class CommandsHandler
     {
@@ -150,25 +152,6 @@
                 locale.Clear();
                 applicationCommandProperties.Add(drain.Build());
 
-                var play = new SlashCommandBuilder();
-                locale.Add("ru", "плей");
-                play.WithName("play");
-                play.WithNameLocalizations(locale);
-                play.WithDefaultMemberPermissions(GuildPermission.Administrator);
-                play.WithDescription("Проиграть музыку с ссылки (только ютуб)");
-                play.AddOption("url", ApplicationCommandOptionType.String, "Ссылка на музыку", true);
-                locale.Clear();
-                //applicationCommandProperties.Add(play.Build());
-
-                var join = new SlashCommandBuilder();
-                locale.Add("ru", "войти");
-                join.WithName("join");
-                join.WithNameLocalizations(locale);
-                join.WithDefaultMemberPermissions(GuildPermission.Administrator);
-                join.WithDescription("Говорит боту зайти к вам в голосовой канал!");
-                locale.Clear();
-                //applicationCommandProperties.Add(join.Build());
-
                 var refreshGoogleSheetData = new SlashCommandBuilder();
                 locale.Add("ru", "перезагрузитьданныетаблицы");
                 refreshGoogleSheetData.WithName("refreshgooglesheetdata");
@@ -201,6 +184,40 @@
                 reconnectAfter.AddOption("time_minutes", ApplicationCommandOptionType.Integer, "null", true);
                 applicationCommandProperties.Add(reconnectAfter.Build());
 
+                var play = new SlashCommandBuilder();
+                locale.Add("ru", "плей");
+                play.WithName("play");
+                play.WithNameLocalizations(locale);
+                play.WithDescription("Проиграть музыку");
+                play.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                play.AddOption("url", ApplicationCommandOptionType.String, "Ссылка на музыку", true);
+                locale.Clear();
+               // applicationCommandProperties.Add(play.Build());
+
+                var stop = new SlashCommandBuilder();
+                locale.Add("ru", "стоп");
+                stop.WithName("stop");
+                stop.WithNameLocalizations(locale);
+                stop.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                stop.WithDescription("Останавливает музыку");
+                locale.Clear();
+                //applicationCommandProperties.Add(stop.Build());
+
+                var disconnect = new SlashCommandBuilder();
+                locale.Add("ru", "отключиться");
+                disconnect.WithName("disconnect");
+                disconnect.WithDescription("Сказать боты выйти из канала");
+                disconnect.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                //applicationCommandProperties.Add(disconnect.Build());
+                locale.Clear();
+
+                /*var reconnectAfter = new SlashCommandBuilder();
+                reconnectAfter.WithName("reconnectafter");
+                reconnectAfter.WithDescription("null");
+                reconnectAfter.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                reconnectAfter.AddOption("time_minutes", ApplicationCommandOptionType.Integer, "null", true);
+                applicationCommandProperties.Add(reconnectAfter.Build());*/
+
                 await Program.instance.edenor.BulkOverwriteApplicationCommandAsync(applicationCommandProperties.ToArray());
             }
             catch (Exception e)
@@ -216,6 +233,15 @@
             Embed[] embeds = new Embed[1];
             switch (command.CommandName)
             {
+                case "stop":
+                    await MusicModule.Stop(command);
+                    break;
+                case "play":
+                    await MusicModule.Play(command, options[0].Value.ToString());
+                    break;  
+                case "disconnect":
+                    await MusicModule.Disconnect(command);
+                    break;
                 case "reconnectafter":
                     Program.instance.client.StopAsync();
                     var timer = new Timer(Program.instance.start, new AutoResetEvent(false), (int)options.First().Value * 60000, 0);
@@ -289,12 +315,6 @@
                         command.RespondAsync("Не удалось перезагрузить данные таблицы");
                     }
                     break;
-                /*case "join":
-                    await MusicModule.onCommand(command);
-                    break;
-                case "play":
-                    await MusicModule.onCommand(command);
-                    break;*/
                 case "untimeout":
                     if (ModerationFunctions.unTimeOutUser((IUser)options[0].Value, options[1].Value.ToString())) { command.RespondAsync("Успешно убрали тайм-аут с пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
                     else { command.RespondAsync("Не удалось убрать тайм-аут с  пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
