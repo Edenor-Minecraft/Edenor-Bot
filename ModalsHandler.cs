@@ -13,9 +13,9 @@ namespace Discord_Bot
                 case "pp_role":
                     var ppEmbed = new EmbedBuilder();
                     ppEmbed.WithTitle("Получение роли И.П");
-                    ppEmbed.AddField("**Ваш ник в Minecraft**", components.First(x => x.CustomId == "minecraft_nick").Value);
-                    ppEmbed.AddField("**Покупная или по заявке**", components.First(x => x.CustomId == "paid_or_free").Value);
-                    ppEmbed.AddField("**Ваш вк (если есть)**", components.First(x => x.CustomId == "vk").Value);
+                    ppEmbed.AddField("**Ваш ник в Minecraft**", components.First(x => x.CustomId == "minecraft_nick").Value, true);
+                    ppEmbed.AddField("**Покупная или по заявке**", components.First(x => x.CustomId == "paid_or_free").Value, true);
+                    ppEmbed.AddField("**Ваш вк (если есть)**", components.First(x => x.CustomId == "vk").Value, true);
                     ppEmbed.WithFooter(new EmbedFooterBuilder().WithText(modal.User.Id.ToString()));
                     ppEmbed.WithCurrentTimestamp();
                     ppEmbed.WithColor(new Color(0, 255, 255));
@@ -26,7 +26,7 @@ namespace Discord_Bot
 
                     ppEmbed.WithAuthor(author); 
                    
-                    var msg = await ((SocketTextChannel)Program.instance.edenor.GetChannel(1055783105916571658)).SendMessageAsync(embed: ppEmbed.Build());
+                    var msg = await ((SocketTextChannel)Program.instance.edenor.GetChannel(1055783105916571658)).SendMessageAsync(modal.User.Mention, embed: ppEmbed.Build());
 
                     if (GoogleSheetsHelper.checkAccepted(components.First(x => x.CustomId == "minecraft_nick").Value))
                     {
