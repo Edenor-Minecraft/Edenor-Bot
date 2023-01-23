@@ -26,8 +26,7 @@ namespace Discord_Bot
             var config = new DiscordSocketConfig
             {
                 GatewayIntents = GatewayIntents.All,
-                MessageCacheSize = 50, 
-                LogLevel = LogSeverity.Debug
+                MessageCacheSize = 50
             };
 
             client = new DiscordSocketClient(config);
