@@ -1,11 +1,12 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
-using System.Linq;
-using System.Text.Json;
-using System.IO;
+﻿global using System;
+global using System.Threading;
+global using System.Threading.Tasks;
+global using Discord;
+global using Discord.WebSocket;
+global using System.Linq;
+global using System.Text.Json;
+global using System.IO;
+global using System.Collections.Generic;
 
 namespace Discord_Bot
 {
@@ -25,7 +26,8 @@ namespace Discord_Bot
             var config = new DiscordSocketConfig
             {
                 GatewayIntents = GatewayIntents.All,
-                MessageCacheSize = 50
+                MessageCacheSize = 50, 
+                LogLevel = LogSeverity.Debug
             };
 
             client = new DiscordSocketClient(config);

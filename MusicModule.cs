@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Text;
-using Discord;
-using Discord.Audio;
-using Discord.WebSocket;
+﻿using Discord.Audio;
 using System.Diagnostics;
 
 namespace Discord_Bot

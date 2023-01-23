@@ -1,11 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
-using System.IO;
-
-namespace Discord_Bot
+﻿namespace Discord_Bot
 {
     class NumberCountingModule
     {

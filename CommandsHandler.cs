@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
-using System.Linq;
-
-namespace Discord_Bot
+﻿namespace Discord_Bot
 {
     class CommandsHandler
     {
@@ -195,7 +188,9 @@ namespace Discord_Bot
                 locale.Clear();
                 applicationCommandProperties.Add(acceptNotification.Build());
 
-                await Program.instance.client.BulkOverwriteGlobalApplicationCommandsAsync(applicationCommandProperties.ToArray());
+                List<ApplicationCommandProperties> mpty = new();
+                await Program.instance.client.BulkOverwriteGlobalApplicationCommandsAsync(mpty.ToArray());
+                await Program.instance.edenor.BulkOverwriteApplicationCommandAsync(applicationCommandProperties.ToArray());
             }
             catch (Exception e)
             {

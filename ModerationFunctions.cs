@@ -1,10 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
-using System;
-
-namespace Discord_Bot
+﻿namespace Discord_Bot
 {
     class ModerationFunctions
     {
