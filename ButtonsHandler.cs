@@ -1,4 +1,6 @@
-﻿namespace Discord_Bot
+﻿using Discord.Interactions;
+
+namespace Discord_Bot
 {
     class ButtonsHandler
     {
@@ -16,6 +18,15 @@
                             msg.Components = null;
                         });
                     }                 
+                    break;
+                case "pp_button":
+                    var mb = new ModalBuilder()
+                    .WithTitle("Получение роли игрока приватки")
+                    .WithCustomId("pp_role")
+                    .AddTextInput("Ваш ник в Minecraft", "minecraft_nick", placeholder: "Steve")
+                    .AddTextInput("Покупная или по заявке", "paid_or_free", placeholder: "Покупная/По заявке")
+                    .AddTextInput("Ваш вк (если есть)", "vk", placeholder: "https://vk.com/feed");
+                    component.RespondWithModalAsync(mb.Build());
                     break;
             }
         }

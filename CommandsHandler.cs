@@ -188,6 +188,19 @@
                 locale.Clear();
                 applicationCommandProperties.Add(acceptNotification.Build());
 
+                var setupPPRole = new SlashCommandBuilder();
+                setupPPRole.WithName("setuppprole");
+                setupPPRole.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                setupPPRole.WithDescription("null");
+                applicationCommandProperties.Add(setupPPRole.Build());
+
+                var reconnectAfter = new SlashCommandBuilder();
+                reconnectAfter.WithName("reconnectafter");
+                reconnectAfter.WithDescription("null");
+                reconnectAfter.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                reconnectAfter.AddOption("time_minutes", ApplicationCommandOptionType.Integer, "null", true);
+                applicationCommandProperties.Add(reconnectAfter.Build());
+
                 List<ApplicationCommandProperties> mpty = new();
                 await Program.instance.client.BulkOverwriteGlobalApplicationCommandsAsync(mpty.ToArray());
                 await Program.instance.edenor.BulkOverwriteApplicationCommandAsync(applicationCommandProperties.ToArray());
@@ -205,6 +218,16 @@
             Embed[] embeds = new Embed[1];
             switch (command.CommandName)
             {
+                case "reconnectafter":
+                    Program.instance.client.StopAsync();
+                    var timer = new Timer(Program.instance.start, new AutoResetEvent(false), (int)options.First().Value * 60000, 0);
+                    break;
+                case "setuppprole":
+                    embed.Title = "Получение роли Игрока Приватки";
+                    embed.Description = "Чтобы получить роль, нажмить на кнопку и заполните заявку. Роль выдаётся в течение 24 часов.";
+                    var ppButton = new ComponentBuilder().WithButton("Подать заявку", "pp_button", ButtonStyle.Success);
+                    command.Channel.SendMessageAsync(embed: embed.Build(), components: ppButton.Build());
+                    break;
                 case "acceptnotification":
                     embed.Title = "Здравствуйте, ваша заявка на сервер была одобрена!";
                     embed.Description = "Советую ознакомиться с правилами на сайте! \nАйпи сервера: \nJava - mc.edenor.ru или play.edenor.ru \nBedrock - pe.edenor.ru(порт 25565)";
