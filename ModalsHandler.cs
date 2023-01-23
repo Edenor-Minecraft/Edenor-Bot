@@ -1,4 +1,6 @@
-﻿namespace Discord_Bot
+﻿using Discord;
+
+namespace Discord_Bot
 {
     class ModalsHandler
     {
@@ -11,12 +13,32 @@
                 case "pp_role":
                     var ppEmbed = new EmbedBuilder();
                     ppEmbed.WithTitle("Получение роли И.П");
-                    ppEmbed.WithFooter(new EmbedFooterBuilder().WithText($"**Ваш ник в Minecraft** \n{components.First(x => x.CustomId == "minecraft_nick").Value}"));
-                    ppEmbed.WithFooter(new EmbedFooterBuilder().WithText($"**Покупная или по заявке** \n{components.First(x => x.CustomId == "paid_or_free").Value}"));
-                    ppEmbed.WithFooter(new EmbedFooterBuilder().WithText($"**Ваш вк (если есть)** \n{components.First(x => x.CustomId == "vk").Value}"));
-                    ppEmbed.Author.WithName(modal.User.Mention).WithIconUrl(modal.User.GetAvatarUrl());    
-                    GoogleSheetsHelper.checkAccepted(components.First(x => x.CustomId == "minecraft_nick").Value);
-                    await ((SocketTextChannel)Program.instance.edenor.GetChannel(1055783105916571658)).SendMessageAsync(embed: ppEmbed.Build());
+                    ppEmbed.AddField("**Ваш ник в Minecraft**", components.First(x => x.CustomId == "minecraft_nick").Value);
+                    ppEmbed.AddField("**Покупная или по заявке**", components.First(x => x.CustomId == "paid_or_free").Value);
+                    ppEmbed.AddField("**Ваш вк (если есть)**", components.First(x => x.CustomId == "vk").Value);
+                    ppEmbed.WithFooter(new EmbedFooterBuilder().WithText(modal.User.Id.ToString()));
+                    ppEmbed.WithCurrentTimestamp();
+                    ppEmbed.WithColor(new Color(0, 255, 255));
+
+                    var author = new EmbedAuthorBuilder();
+                    author.Name = modal.User.Username + "#" + modal.User.Discriminator;
+                    author.IconUrl = modal.User.GetAvatarUrl();
+
+                    ppEmbed.WithAuthor(author); 
+                   
+                    var msg = await ((SocketTextChannel)Program.instance.edenor.GetChannel(1055783105916571658)).SendMessageAsync(embed: ppEmbed.Build());
+
+                    if (GoogleSheetsHelper.checkAccepted(components.First(x => x.CustomId == "minecraft_nick").Value))
+                    {
+                        Program.instance.edenor.GetUser(Convert.ToUInt64(modal.User.Id)).AddRoleAsync(802248363503648899);
+                        msg.AddReactionAsync(new Emoji("\u2705"));
+                    }
+                    else
+                    {
+                        msg.AddReactionAsync(new Emoji("\u274C"));
+                    }
+
+                    modal.RespondAsync(embed: ppEmbed.Build(), ephemeral: true);
                     break;
             }
         }

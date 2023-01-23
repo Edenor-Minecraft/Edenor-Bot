@@ -15,22 +15,32 @@ namespace Discord_Bot
         public static Program instance = null;
         public DiscordSocketClient client;
         public SocketGuild edenor;
-        static Timer googleTimer = new Timer(GoogleSheetsHelper.timer, new AutoResetEvent(true), 1000, 1800000);
+        static Timer googleTimer;
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
 
         static string configDir = (Environment.CurrentDirectory + "/config.json");
 
+        private bool ready = false;
+
+        private BotConfig config = null;
+
         public Program()
         {
-            var config = new DiscordSocketConfig
+            instance = this;
+
+            googleTimer = new Timer(GoogleSheetsHelper.timer, new AutoResetEvent(true), 1000, 1800000);
+
+            string stream = File.ReadAllText(configDir);
+            config = JsonSerializer.Deserialize<BotConfig>(stream);
+
+            var socketConfig = new DiscordSocketConfig
             {
                 GatewayIntents = GatewayIntents.All,
-                MessageCacheSize = 50, 
-                LogLevel = LogSeverity.Debug
+                MessageCacheSize = 50
             };
 
-            client = new DiscordSocketClient(config);
+            client = new DiscordSocketClient(socketConfig);
             client.MessageReceived += MessagesHandler;
             client.Log += Log;
             client.Ready += onReady;
@@ -40,14 +50,9 @@ namespace Discord_Bot
             client.ModalSubmitted += ModalsHandler.onModal;
 
             GoogleSheetsHelper.setupHelper();
-
-            instance = this;
         }
         private async Task MainAsync()
         {
-            using FileStream stream = File.OpenRead(configDir);
-            BotConfig config = await JsonSerializer.DeserializeAsync<BotConfig>(stream);
-
             var token = config.token;
 
             await client.LoginAsync(TokenType.Bot, token);
@@ -57,6 +62,7 @@ namespace Discord_Bot
         }
         private async Task onReady()
         {
+            ready = true;
             logTrace("Ready to work, bitches!");
             await client.SetActivityAsync(new StreamingGame("Эденор", "https://edenor.ru/"));
             edenor = client.CurrentUser.MutualGuilds.First(); //Easy access to edenor guild
@@ -92,32 +98,6 @@ namespace Discord_Bot
         }
         private Task MessagesHandler(SocketMessage msg)
         {
-            if (msg.Author.Id == 941460895912034335 && msg.Channel.Id == 1055783105916571658)
-            {
-                var enumerator = msg.Embeds.GetEnumerator();
-                while (enumerator.MoveNext())
-                {
-                    if (GoogleSheetsHelper.checkAccepted(/*enumerator.Current.Author.Value.Name, */enumerator.Current.Fields[0].Value))
-                    {
-                        var globalUser = client.GetUser(Convert.ToUInt64(enumerator.Current.Footer.Value.Text));
-                        SocketGuild edenGuild = globalUser.MutualGuilds.ElementAt(0);
-                        var enumerator2 = edenGuild.Users.GetEnumerator();
-                        while (enumerator2.MoveNext())
-                        {
-                            if (enumerator2.Current.Id == Convert.ToUInt64(enumerator.Current.Footer.Value.Text))
-                            {
-                                enumerator2.Current.AddRoleAsync(802248363503648899);
-                                msg.AddReactionAsync(new Emoji("\u2705"));
-                            }
-                        }   
-                    }
-                    else
-                    {
-                        msg.AddReactionAsync(new Emoji("\u274C"));
-                    }
-                }
-            }
-
             if (msg.Channel.Id == 1062273336354275348)
             {
                 return NumberCountingModule.doWork(msg);
@@ -146,31 +126,67 @@ namespace Discord_Bot
         private static string Timestamp => $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}";
         public async Task logTrace(string msg)
         {
-            await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [TRACE] :  {msg}");
+            if (!ready)
+            {
+                Console.WriteLine($"[{Timestamp}] [TRACE] :  {msg}");
+            }
+            else
+            {
+                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [TRACE] :  {msg}");
+            }        
         }
 
         public async Task logError(string msg)
         {
-            await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [ERROR] :  {msg}");
+            if (!ready)
+            {
+                Console.WriteLine($"[{Timestamp}] [ERROR] :  {msg}");
+            }
+            else
+            {
+                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [ERROR] :  {msg}");
+            }
         }
 
         public async Task logInfo(string msg)
         {
-            await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [INFO] :  {msg}");
+            if (!ready)
+            {
+                Console.WriteLine($"[{Timestamp}] [INFO] :  {msg}");
+            }
+            else
+            {
+                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [INFO] :  {msg}");
+            }
         }
 
         public async Task logWarn(string msg)
         {
-            await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [WARN] :  {msg}");
+            if (!ready)
+            {
+                Console.WriteLine($"[{Timestamp}] [WARN] :  {msg}");
+            }
+            else
+            {
+                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [WARN] :  {msg}");
+            }
         }
+
         public async Task logCritical (string msg)
         {
-            await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [CRITICAL ERROR] :  {msg}");
+            if (!ready)
+            {
+                Console.WriteLine($"[{Timestamp}] [CRITICAL ERROR] :  {msg}");
+            }
+            else
+            {
+                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [CRITICAL ERROR] :  {msg}");
+            }
         }
     }
 
     class BotConfig
     {
-        public string token { get;}
+        public string token { set; get; }
     }
 }

@@ -201,8 +201,6 @@
                 reconnectAfter.AddOption("time_minutes", ApplicationCommandOptionType.Integer, "null", true);
                 applicationCommandProperties.Add(reconnectAfter.Build());
 
-                List<ApplicationCommandProperties> mpty = new();
-                await Program.instance.client.BulkOverwriteGlobalApplicationCommandsAsync(mpty.ToArray());
                 await Program.instance.edenor.BulkOverwriteApplicationCommandAsync(applicationCommandProperties.ToArray());
             }
             catch (Exception e)
@@ -227,6 +225,7 @@
                     embed.Description = "Чтобы получить роль, нажмить на кнопку и заполните заявку. Роль выдаётся в течение 24 часов.";
                     var ppButton = new ComponentBuilder().WithButton("Подать заявку", "pp_button", ButtonStyle.Success);
                     command.Channel.SendMessageAsync(embed: embed.Build(), components: ppButton.Build());
+                    return;
                     break;
                 case "acceptnotification":
                     embed.Title = "Здравствуйте, ваша заявка на сервер была одобрена!";
