@@ -84,7 +84,7 @@ namespace Discord_Bot
                         {
                             accepted = checkColor(discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Red.GetValueOrDefault(1), discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Blue.GetValueOrDefault(1), discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Green.GetValueOrDefault(1));
                         }                       
-                        try { if (discordAccountsList.ContainsKey(row[2].ToString())) {gridRow += 1; continue; }} catch (Exception e) { gridRow += 1; Program.instance.logTrace(e.Message); continue; }
+                        try { if (discordAccountsList.ContainsKey(row[3].ToString())) {gridRow += 1; continue; }} catch (Exception e) { gridRow += 1; Program.instance.logTrace(e.Message); continue; }
 
                         discordAccountsList.Add(row[3].ToString(), accepted);
                         //minecraftAccountsList.Add(row[2].ToString(), row[3].ToString());

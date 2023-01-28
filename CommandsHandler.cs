@@ -231,6 +231,7 @@ namespace Discord_Bot
             var options = command.Data.Options.ToArray();
             var embed = new EmbedBuilder(); 
             Embed[] embeds = new Embed[1];
+            embed.WithColor(new Color(0, 255, 255));
             switch (command.CommandName)
             {
                 case "stop":
@@ -244,13 +245,20 @@ namespace Discord_Bot
                     break;
                 case "reconnectafter":
                     Program.instance.client.StopAsync();
-                    var timer = new Timer(Program.instance.start, new AutoResetEvent(false), (int)options.First().Value * 60000, 0);
+                    var timer = new Timer(Program.instance.start, new AutoResetEvent(false), Convert.ToInt32(options.First().Value) * 60000, 0);
                     break;
                 case "setuppprole":
                     embed.Title = "Получение роли Игрока Приватки";
                     embed.Description = "Чтобы получить роль, нажмить на кнопку и заполните заявку. Роль выдаётся в течение 24 часов.";
-                    var ppButton = new ComponentBuilder().WithButton("Подать заявку", "pp_button", ButtonStyle.Success);
-                    command.Channel.SendMessageAsync(embed: embed.Build(), components: ppButton.Build());
+                    var menuBuilder = new SelectMenuBuilder()
+                    .WithPlaceholder("Выберите тип проходки")
+                    .WithCustomId("pp_select_menu")
+                    .WithMinValues(1)
+                    .WithMaxValues(1)
+                    .AddOption("По заявке", "by_request", "Выберите это, если вас приняли по заявке!")
+                    .AddOption("Купленная", "purchased", "Выберите это, если вы купили проходку на сайте!");
+                    var ppbuilder = new ComponentBuilder().WithSelectMenu(menuBuilder);
+                    command.Channel.SendMessageAsync(embed: embed.Build(), components: ppbuilder.Build());
                     return;
                     break;
                 case "acceptnotification":

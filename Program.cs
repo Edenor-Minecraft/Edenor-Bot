@@ -50,6 +50,7 @@ namespace Discord_Bot
             client.ButtonExecuted += ButtonsHandler.onButton;
             client.MessageDeleted += onMessageDeleted;
             client.ModalSubmitted += ModalsHandler.onModal;
+            client.SelectMenuExecuted += SelectMenuModule.onSelect;
 
             GoogleSheetsHelper.setupHelper();
         }
@@ -69,6 +70,7 @@ namespace Discord_Bot
             await client.SetActivityAsync(new StreamingGame("Эденор", "https://edenor.ru/"));
             edenor = client.CurrentUser.MutualGuilds.First(); //Easy access to edenor guild
             CommandsHandler.setupCommands();
+            GoogleSheetsHelper.timer(null);
         }
 
         public void start(object stateInfo)
