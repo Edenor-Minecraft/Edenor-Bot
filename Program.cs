@@ -7,6 +7,8 @@ global using System.Linq;
 global using System.Text.Json;
 global using System.IO;
 global using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Discord_Bot
 {
@@ -128,63 +130,63 @@ namespace Discord_Bot
         }
 
         private static string Timestamp => $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}";
-        public async Task logTrace(string msg)
+        public async Task logTrace(string msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (!ready)
             {
-                Console.WriteLine($"[{Timestamp}] [TRACE] :  {msg}");
+                Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [TRACE]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [TRACE] :  {msg}");
+                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [TRACE]:  {msg}");
             }        
         }
 
-        public async Task logError(string msg)
+        public async Task logError(string msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (!ready)
             {
-                Console.WriteLine($"[{Timestamp}] [ERROR] :  {msg}");
+                Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [ERROR]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [ERROR] :  {msg}");
+                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [ERROR]:  {msg}");
             }
         }
 
-        public async Task logInfo(string msg)
+        public async Task logInfo(string msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (!ready)
             {
-                Console.WriteLine($"[{Timestamp}] [INFO] :  {msg}");
+                Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [INFO]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [INFO] :  {msg}");
+                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [INFO]:  {msg}");
             }
         }
 
-        public async Task logWarn(string msg)
+        public async Task logWarn(string msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (!ready)
             {
-                Console.WriteLine($"[{Timestamp}] [WARN] :  {msg}");
+                Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [WARN]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [WARN] :  {msg}");
+                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [WARN]:  {msg}");
             }
         }
 
-        public async Task logCritical (string msg)
+        public async Task logCritical (string msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
             if (!ready)
             {
-                Console.WriteLine($"[{Timestamp}] [CRITICAL ERROR] :  {msg}");
+                Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [CRITICAL ERROR]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] [CRITICAL ERROR] :  {msg}");
+                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [CRITICAL ERROR]:  {msg}");
             }
         }
     }

@@ -211,6 +211,12 @@ namespace Discord_Bot
                 //applicationCommandProperties.Add(disconnect.Build());
                 locale.Clear();
 
+                var ping = new SlashCommandBuilder();
+                ping.WithName("ping");
+                ping.WithDescription("null");
+                ping.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                applicationCommandProperties.Add(ping.Build());
+
                 /*var reconnectAfter = new SlashCommandBuilder();
                 reconnectAfter.WithName("reconnectafter");
                 reconnectAfter.WithDescription("null");
@@ -234,6 +240,13 @@ namespace Discord_Bot
             embed.WithColor(new Color(0, 255, 255));
             switch (command.CommandName)
             {
+                case "ping":
+                    var pingOpt = new RequestOptions()
+                    {
+                        RatelimitCallback = MyRatelimitCallback
+                    };
+                    await command.RespondAsync("Pong!", options: pingOpt);
+                    break;
                 case "stop":
                     await MusicModule.Stop(command);
                     break;
@@ -401,6 +414,11 @@ namespace Discord_Bot
                 default:
                     break;
             }
+        }
+
+        public static async Task MyRatelimitCallback(IRateLimitInfo info)
+        {
+            Program.instance.logInfo($"isGlobal: {info.IsGlobal} \n Limit: {info.Limit} \n Remaining: {info.Remaining} \n RetryAfter: {info.RetryAfter} \n Reset: {info.Reset} \n ResetAfter: {info.ResetAfter} \n Bucket: {info.Bucket} \n Lag: {info.Lag} \n Endpoint: {info.Endpoint}");
         }
     }
 }

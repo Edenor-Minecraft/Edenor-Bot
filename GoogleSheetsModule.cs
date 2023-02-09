@@ -43,13 +43,11 @@ namespace Discord_Bot
         }
 
         static IDictionary<string, bool> discordAccountsList = new Dictionary<string, bool>();
-        static IDictionary<string, string> minecraftAccountsList = new Dictionary<string, string>();
         private static void ReadEntries()
         {
            try
            {
                 discordAccountsList.Clear();
-                minecraftAccountsList.Clear();
                 var range = $"{sheet}!A:F";
                 SpreadsheetsResource.GetRequest sheetData =
                         service.Spreadsheets.Get(SpreadsheetId);
@@ -78,16 +76,24 @@ namespace Discord_Bot
                 {
                     foreach (var row in values)
                     {
+                        string nick = "";
+                        if (row.Count > 3)
+                            nick = row[3].ToString();
                         if (gridRow > values.Count - 1) { break; }
                         bool accepted = false;
-                        if (discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat != null)
+                        if (discordColumn.RowData.ElementAt(gridRow) != null) //Giga null checking
                         {
-                            accepted = checkColor(discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Red.GetValueOrDefault(1), discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Blue.GetValueOrDefault(1), discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Green.GetValueOrDefault(1));
-                        }                       
-                        try { if (discordAccountsList.ContainsKey(row[3].ToString())) {gridRow += 1; continue; }} catch (Exception e) { gridRow += 1; Program.instance.logTrace(e.Message); continue; }
+                            if (discordColumn.RowData.ElementAt(gridRow).Values != null && discordColumn.RowData.ElementAt(gridRow).Values.Count > 2)
+                            {
+                                if (discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat != null)
+                                {
+                                    accepted = checkColor(discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Red.GetValueOrDefault(1), discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Blue.GetValueOrDefault(1), discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Green.GetValueOrDefault(1));
+                                }
+                            }                           
+                        }                                         
+                        if (discordAccountsList.ContainsKey(nick)) {gridRow += 1; continue; }
 
-                        discordAccountsList.Add(row[3].ToString(), accepted);
-                        //minecraftAccountsList.Add(row[2].ToString(), row[3].ToString());
+                        discordAccountsList.Add(nick, accepted);
                         gridRow += 1;
                     }
                 }
@@ -98,7 +104,7 @@ namespace Discord_Bot
            }
            catch(Exception e)
            {
-               Program.instance.logError(e.Message);
+               Program.instance.logError(e.Message + e.StackTrace);
            }
         }
 
