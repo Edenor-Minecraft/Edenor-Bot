@@ -27,8 +27,8 @@ namespace Discord_Bot
                 globalCommandBan.WithDescription("Банит участника сервера");
                 globalCommandBan.WithDefaultMemberPermissions(GuildPermission.BanMembers);
                 globalCommandBan.AddOption("user", ApplicationCommandOptionType.User, "Участник сервера, который будет забанен", true);
-                globalCommandBan.AddOption("days", ApplicationCommandOptionType.Integer, "Количество дней для удаления сообщений от этого пользователя", true);
-                globalCommandBan.AddOption("reason", ApplicationCommandOptionType.String, "Причина бана", true);
+                globalCommandBan.AddOption("days", ApplicationCommandOptionType.Integer, "Количество дней для удаления сообщений от этого пользователя", false);
+                globalCommandBan.AddOption("reason", ApplicationCommandOptionType.String, "Причина бана", false);
                 locale.Clear();
                 applicationCommandProperties.Add(globalCommandBan.Build());
 
@@ -39,7 +39,7 @@ namespace Discord_Bot
                 globalCommandunBan.WithDescription("Разбанивает человека");
                 globalCommandunBan.WithDefaultMemberPermissions(GuildPermission.BanMembers);
                 globalCommandunBan.AddOption("user", ApplicationCommandOptionType.User, "Участник сервера, который будет разбанен", true);
-                globalCommandunBan.AddOption("reason", ApplicationCommandOptionType.String, "Причина разбана", true);
+                globalCommandunBan.AddOption("reason", ApplicationCommandOptionType.String, "Причина разбана", false);
                 locale.Clear();
                 applicationCommandProperties.Add(globalCommandunBan.Build());
 
@@ -50,7 +50,7 @@ namespace Discord_Bot
                 globalCommandKick.WithDescription("Выгоняет участника сервера");
                 globalCommandKick.WithDefaultMemberPermissions(GuildPermission.KickMembers);
                 globalCommandKick.AddOption("user", ApplicationCommandOptionType.User, "Участник сервера, который будет выгнан", true);
-                globalCommandKick.AddOption("reason", ApplicationCommandOptionType.String, "Причина кика", true);
+                globalCommandKick.AddOption("reason", ApplicationCommandOptionType.String, "Причина кика", false);
                 locale.Clear();
                 applicationCommandProperties.Add(globalCommandKick.Build());
 
@@ -61,8 +61,8 @@ namespace Discord_Bot
                 globalCommandTimeOut.WithDescription("Отправляет пользователя подумать о певедении");
                 globalCommandTimeOut.WithDefaultMemberPermissions(GuildPermission.ModerateMembers);
                 globalCommandTimeOut.AddOption("user", ApplicationCommandOptionType.User, "Участник сервера, который будет отправлен думать о своём поведении", true);
-                globalCommandTimeOut.AddOption("time", ApplicationCommandOptionType.String, "Время тайм-аута плюс (s, m, h, d) в конце", true);
-                globalCommandTimeOut.AddOption("reason", ApplicationCommandOptionType.String, "Причина выдачи тайм-аута", true);
+                globalCommandTimeOut.AddOption("time", ApplicationCommandOptionType.String, "Время тайм-аута плюс (s, m, h, d) в конце", false);
+                globalCommandTimeOut.AddOption("reason", ApplicationCommandOptionType.String, "Причина выдачи тайм-аута", false);
                 locale.Clear();
                 applicationCommandProperties.Add(globalCommandTimeOut.Build());
 
@@ -73,7 +73,7 @@ namespace Discord_Bot
                 globalCommandUnTimeOut.WithDescription("Убирает тайм-аут с пользователя");
                 globalCommandUnTimeOut.WithDefaultMemberPermissions(GuildPermission.ModerateMembers);
                 globalCommandUnTimeOut.AddOption("user", ApplicationCommandOptionType.User, "Пользователь, с которого надо убрать тайм-аут", true);
-                globalCommandUnTimeOut.AddOption("reason", ApplicationCommandOptionType.String, "Причина снятия тайм-аута", true);
+                globalCommandUnTimeOut.AddOption("reason", ApplicationCommandOptionType.String, "Причина снятия тайм-аута", false);
                 locale.Clear();
                 applicationCommandProperties.Add(globalCommandUnTimeOut.Build());
 

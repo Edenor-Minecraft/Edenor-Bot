@@ -66,7 +66,7 @@
             {
                 var options = new RequestOptions();
                 options.AuditLogReason = reason;
-                ((SocketGuildUser)user).BanAsync(days, reason, options: options);
+                Program.instance.edenor.AddBanAsync(user, days, reason, options: options);
                 return true;
             }
             catch(Exception e)
