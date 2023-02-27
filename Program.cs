@@ -27,8 +27,6 @@ namespace Discord_Bot
 
         private BotConfig config = null;
 
-        public MusicModule musicModule;
-
         public Program()
         {
             instance = this;
@@ -40,7 +38,7 @@ namespace Discord_Bot
 
             var socketConfig = new DiscordSocketConfig
             {
-                GatewayIntents = GatewayIntents.All,
+                GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers | GatewayIntents.MessageContent,
                 MessageCacheSize = 50
             };
 

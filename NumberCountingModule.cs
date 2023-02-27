@@ -85,7 +85,10 @@
             }
             catch (Exception e)
             {
-                msg.DeleteAsync();
+                if (msg.Author.Id != 710401785663193158)
+                {
+                    msg.DeleteAsync();
+                }
                 Program.instance.logError(e.Message);
                 return Task.CompletedTask;
             }

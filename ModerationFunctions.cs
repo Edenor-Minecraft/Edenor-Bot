@@ -29,12 +29,12 @@
                 return false;
             }
         }
-        public static Boolean unTimeOutUser(IUser user, string reason)
+        public static Boolean unTimeOutUser(IUser user, SocketSlashCommandDataOption? reason)
         {
             try
             {
                 var options = new RequestOptions();
-                options.AuditLogReason = reason;
+                options.AuditLogReason = reason == null ? string.Empty : reason.Value.ToString();
                 ((SocketGuildUser)user).RemoveTimeOutAsync();
                 return true;
             }
@@ -45,12 +45,12 @@
             }
         }
 
-        public static Boolean unBanUser(IUser user, string reason = "")
+        public static Boolean unBanUser(IUser user, SocketSlashCommandDataOption? reason)
         {
             try
             {
                 var options = new RequestOptions();
-                options.AuditLogReason = reason;
+                options.AuditLogReason = reason == null ? string.Empty : reason.Value.ToString();
                 Program.instance.edenor.RemoveBanAsync(user, options);
                 return true;
             }
@@ -60,13 +60,22 @@
                 return false;
             }
         }
-        public static Boolean banUser(IUser user, int days = 0, string reason = "")
+        public static Boolean banUser(IUser user, SocketSlashCommandDataOption? daysOpt, object? reasonOpt)
         {
             try
             {
+                string reason = string.Empty;
+                if (reasonOpt != null)
+                {
+                    if (reasonOpt.GetType() == typeof(SocketSlashCommandDataOption)) { reason = ((SocketSlashCommandDataOption)reasonOpt).Value.ToString(); }
+                    else if (reasonOpt.GetType() == typeof(string)) { reason = (string)reasonOpt; }
+                }
+                int days = 0;
+                if (daysOpt != null) days = Convert.ToInt32(daysOpt.Value);
+
                 var options = new RequestOptions();
                 options.AuditLogReason = reason;
-                Program.instance.edenor.AddBanAsync(user, days, reason, options: options);
+                Program.instance.edenor.AddBanAsync(user, (int)days, reason, options: options);
                 return true;
             }
             catch(Exception e)
@@ -76,13 +85,15 @@
             }
         }
 
-        public static Boolean timeOutUser(IUser user, TimeSpan time, string reason = "")
+        public static Boolean timeOutUser(IUser user, TimeSpan? time, SocketSlashCommandDataOption? reason)
         {
             try
             {
+                if (time == null) time = TimeSpan.FromHours(1);
+
                 var options = new RequestOptions();
-                options.AuditLogReason = reason;
-                ((SocketGuildUser)user).SetTimeOutAsync(time, options);
+                options.AuditLogReason = reason == null ? string.Empty : reason.Value.ToString();
+                ((SocketGuildUser)user).SetTimeOutAsync((TimeSpan)time, options);
                 return true;
             }
             catch (Exception e)
@@ -92,13 +103,13 @@
             }
         }
 
-        public static Boolean kickUser(IUser user, string reason = "")
+        public static Boolean kickUser(IUser user, SocketSlashCommandDataOption? reason)
         {
             try
             {
                 var options = new RequestOptions();
-                options.AuditLogReason = reason;
-                ((SocketGuildUser)user).KickAsync(reason, options: options);
+                options.AuditLogReason = reason == null ? string.Empty : reason.Value.ToString();
+                ((SocketGuildUser)user).KickAsync(reason == null ? string.Empty : reason.Value.ToString(), options: options);
                 return true;
             }
             catch (Exception e)

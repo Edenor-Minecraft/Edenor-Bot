@@ -11,7 +11,7 @@ namespace Discord_Bot
                 case "selfBanButton":
                     if (component.Message.MentionedUsers.First().Id == component.User.Id)
                     {
-                        ModerationFunctions.banUser(component.User, 0, "Самобан");
+                        ModerationFunctions.banUser(component.User, null, "Самобан");
                         component.UpdateAsync(msg =>
                         {
                             msg.Content = $"Пользователь {component.User.Username} успешно забанен!";

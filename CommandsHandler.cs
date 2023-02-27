@@ -1,4 +1,5 @@
-﻿using System.Threading.Channels;
+﻿using System.Linq;
+using System.Threading.Channels;
 
 namespace Discord_Bot
 {
@@ -76,16 +77,6 @@ namespace Discord_Bot
                 globalCommandUnTimeOut.AddOption("reason", ApplicationCommandOptionType.String, "Причина снятия тайм-аута", false);
                 locale.Clear();
                 applicationCommandProperties.Add(globalCommandUnTimeOut.Build());
-
-                var secretCommand = new SlashCommandBuilder();
-                locale.Add("ru", "ошибка");
-                secretCommand.WithName("error");
-                secretCommand.WithNameLocalizations(locale);
-                secretCommand.WithDescription("Превращает человека в ошибку");
-                secretCommand.WithDefaultMemberPermissions(GuildPermission.Administrator);
-                secretCommand.AddOption("take", ApplicationCommandOptionType.Boolean, "Забрать роль?", true);
-                locale.Clear();
-                //applicationCommandProperties.Add(secretCommand.Build());
 
                 var giveRole = new SlashCommandBuilder();
                 locale.Add("ru", "датьроль");
@@ -184,45 +175,11 @@ namespace Discord_Bot
                 reconnectAfter.AddOption("time_minutes", ApplicationCommandOptionType.Integer, "null", true);
                 applicationCommandProperties.Add(reconnectAfter.Build());
 
-                var play = new SlashCommandBuilder();
-                locale.Add("ru", "плей");
-                play.WithName("play");
-                play.WithNameLocalizations(locale);
-                play.WithDescription("Проиграть музыку");
-                play.WithDefaultMemberPermissions(GuildPermission.Administrator);
-                play.AddOption("url", ApplicationCommandOptionType.String, "Ссылка на музыку", true);
-                locale.Clear();
-               // applicationCommandProperties.Add(play.Build());
-
-                var stop = new SlashCommandBuilder();
-                locale.Add("ru", "стоп");
-                stop.WithName("stop");
-                stop.WithNameLocalizations(locale);
-                stop.WithDefaultMemberPermissions(GuildPermission.Administrator);
-                stop.WithDescription("Останавливает музыку");
-                locale.Clear();
-                //applicationCommandProperties.Add(stop.Build());
-
-                var disconnect = new SlashCommandBuilder();
-                locale.Add("ru", "отключиться");
-                disconnect.WithName("disconnect");
-                disconnect.WithDescription("Сказать боты выйти из канала");
-                disconnect.WithDefaultMemberPermissions(GuildPermission.Administrator);
-                //applicationCommandProperties.Add(disconnect.Build());
-                locale.Clear();
-
                 var ping = new SlashCommandBuilder();
                 ping.WithName("ping");
                 ping.WithDescription("null");
                 ping.WithDefaultMemberPermissions(GuildPermission.Administrator);
                 applicationCommandProperties.Add(ping.Build());
-
-                /*var reconnectAfter = new SlashCommandBuilder();
-                reconnectAfter.WithName("reconnectafter");
-                reconnectAfter.WithDescription("null");
-                reconnectAfter.WithDefaultMemberPermissions(GuildPermission.Administrator);
-                reconnectAfter.AddOption("time_minutes", ApplicationCommandOptionType.Integer, "null", true);
-                applicationCommandProperties.Add(reconnectAfter.Build());*/
 
                 await Program.instance.edenor.BulkOverwriteApplicationCommandAsync(applicationCommandProperties.ToArray());
             }
@@ -234,32 +191,12 @@ namespace Discord_Bot
         public static async Task onCommand(SocketSlashCommand command)
         {
             if (command.GuildId == null) {command.RespondAsync("Нельзя использовать команды в личных сообщениях!"); return;}
-            var options = command.Data.Options.ToArray();
+            List<SocketSlashCommandDataOption> options = command.Data.Options.ToList();
             var embed = new EmbedBuilder(); 
             Embed[] embeds = new Embed[1];
             embed.WithColor(new Color(0, 255, 255));
             switch (command.CommandName)
             {
-                case "ping":
-                    var pingOpt = new RequestOptions()
-                    {
-                        RatelimitCallback = MyRatelimitCallback
-                    };
-                    await command.RespondAsync("Pong!", options: pingOpt);
-                    break;
-                case "stop":
-                    await MusicModule.Stop(command);
-                    break;
-                case "play":
-                    await MusicModule.Play(command, options[0].Value.ToString());
-                    break;  
-                case "disconnect":
-                    await MusicModule.Disconnect(command);
-                    break;
-                case "reconnectafter":
-                    Program.instance.client.StopAsync();
-                    var timer = new Timer(Program.instance.start, new AutoResetEvent(false), Convert.ToInt32(options.First().Value) * 60000, 0);
-                    break;
                 case "setuppprole":
                     embed.Title = "Получение роли Игрока Приватки";
                     embed.Description = "Чтобы получить роль, нажмить на кнопку и заполните заявку. Роль выдаётся в течение 24 часов.";
@@ -272,7 +209,6 @@ namespace Discord_Bot
                     .AddOption("Купленная", "purchased", "Выберите это, если вы купили проходку на сайте!");
                     var ppbuilder = new ComponentBuilder().WithSelectMenu(menuBuilder);
                     command.Channel.SendMessageAsync(embed: embed.Build(), components: ppbuilder.Build());
-                    return;
                     break;
                 case "acceptnotification":
                     embed.Title = "Здравствуйте, ваша заявка на сервер была одобрена!";
@@ -299,7 +235,7 @@ namespace Discord_Bot
                     break;
                 case "giverole":
                     if (((IUser)options[0].Value).Id == 324794944042565643 && command.User.Id != 324794944042565643) { command.RespondAsync("Невозможно изменить роль великому Альтрону!"); break; }
-                    if (!(bool)options[2])
+                    if (!(bool)options.ElementAtOrDefault(2))
                     {
                         try
                         {
@@ -337,9 +273,65 @@ namespace Discord_Bot
                     }
                     break;
                 case "untimeout":
-                    if (ModerationFunctions.unTimeOutUser((IUser)options[0].Value, options[1].Value.ToString())) { command.RespondAsync("Успешно убрали тайм-аут с пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
+                    if (ModerationFunctions.unTimeOutUser((IUser)options[0].Value, options.ElementAtOrDefault(1))) { command.RespondAsync("Успешно убрали тайм-аут с пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
                     else { command.RespondAsync("Не удалось убрать тайм-аут с  пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
                     break;
+                
+                case "selfban":
+                    var builder = new ComponentBuilder().WithButton("Подтвердить", "selfBanButton");
+                    command.RespondAsync(MentionUtils.MentionUser(command.User.Id) + ", вы уверенны, что хотите забанить себя?", components: builder.Build());           
+                    break;
+
+                case "setnumber":
+                    NumberCountingModule.onCommand(command);
+                    break;
+
+                case "timeout":
+                    string value = "1h";
+                    if (options.ElementAtOrDefault(1) != null)
+                    {
+                        value = options.ElementAtOrDefault(1).Value.ToString();
+                    }
+                    TimeSpan interval;
+                    if (value.EndsWith("s"))
+                    {
+                        interval = TimeSpan.FromSeconds((double)(int.Parse(value.Replace("s", ""))));
+                    }
+                    else if (value.EndsWith("d"))
+                    {
+                        interval = TimeSpan.FromDays((double)(int.Parse(value.Replace("d", ""))));
+                    }
+                    else if (value.EndsWith("m"))
+                    {
+                        interval = TimeSpan.FromMinutes((double)(int.Parse(value.Replace("m", ""))));
+                    }
+                    else if (value.EndsWith("h"))
+                    {
+                        interval = TimeSpan.FromHours((double)(int.Parse(value.Replace("h", ""))));
+                    }
+                    else
+                    {
+                        interval = TimeSpan.FromHours(1);
+                    }
+                    if (ModerationFunctions.timeOutUser((IUser)options[0].Value, interval, options.ElementAtOrDefault(2))) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно отправлен подумать о своём поведении!"); }
+                    else { command.RespondAsync("Не удалось отправить пользователя " + ((IUser)command.Data.Options.First().Value).Username + " думать о своём поведении"); }
+                    break;
+
+                case "kick":
+                    if (ModerationFunctions.kickUser((IUser)options[0].Value, options.ElementAtOrDefault(1))) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно выгнан!"); }
+                    else { command.RespondAsync("Не удалось выгнать пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
+                    break;
+
+                case "ban":
+                    if (ModerationFunctions.banUser((IUser)options[0].Value,options.ElementAtOrDefault(1), options.ElementAtOrDefault(2))) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно забанен!"); }
+                    else {command.RespondAsync("Не удалось забанить пользователя " + ((IUser)command.Data.Options.First().Value).Username);}
+                    break;
+
+                case "unban":
+                    if (ModerationFunctions.unBanUser((IUser)options[0].Value, options.ElementAtOrDefault(1))) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно разбанен!"); }
+                    else { command.RespondAsync("Не удалось разбанить пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
+                    break;
+
                 case "drain":
                     embed.WithImageUrl("https://sun9-31.userapi.com/impg/5XDja0msmDXKIcTjCUO-q0upvW2-Q71Yjh3JRA/T9otFwXmqZI.jpg?size=889x509&quality=96&sign=3b9173beca1bdca211a583f993396ffa&type=album");
                     embeds[0] = embed.Build();
@@ -361,56 +353,11 @@ namespace Discord_Bot
                     command.RespondAsync("Откат рп", embeds: embeds);
                     break;
                 case "gay":
-                    embed.WithImageUrl("https://sun9-77.userapi.com/impg/JbpoRqn-xlIGK0lfTrT1-dAx1RlUkLilNm8I1w/_0c0I-NhNrY.jpg?size=518x162&quality=96&sign=327b5827ba9b9d809113f555d3029e92&type=album");               
+                    embed.WithImageUrl("https://sun9-77.userapi.com/impg/JbpoRqn-xlIGK0lfTrT1-dAx1RlUkLilNm8I1w/_0c0I-NhNrY.jpg?size=518x162&quality=96&sign=327b5827ba9b9d809113f555d3029e92&type=album");
                     embeds[0] = embed.Build();
                     command.RespondAsync("Лови гея", embeds: embeds);
                     break;
-                case "selfban":
-                    var builder = new ComponentBuilder().WithButton("Подтвердить", "selfBanButton");
-                    command.RespondAsync(MentionUtils.MentionUser(command.User.Id) + ", вы уверенны, что хотите забанить себя?", components: builder.Build());           
-                    break;
 
-                case "setnumber":
-                    NumberCountingModule.onCommand(command);
-                    break;
-                case "timeout":
-                    TimeSpan interval;
-                    if (options[1].Value.ToString().EndsWith("s"))
-                    {
-                        interval = TimeSpan.FromSeconds((double)(int.Parse(options[1].Value.ToString().Replace("s", ""))));
-                    }
-                    else if (options[1].Value.ToString().EndsWith("d"))
-                    {
-                        interval = TimeSpan.FromDays((double)(int.Parse(options[1].Value.ToString().Replace("d", ""))));
-                    }
-                    else if (options[1].Value.ToString().EndsWith("m"))
-                    {
-                        interval = TimeSpan.FromMinutes((double)(int.Parse(options[1].Value.ToString().Replace("m", ""))));
-                    }
-                    else if (options[1].Value.ToString().EndsWith("h"))
-                    {
-                        interval = TimeSpan.FromHours((double)(int.Parse(options[1].Value.ToString().Replace("h", ""))));
-                    }
-                    else
-                    {
-                        command.RespondAsync("Неправильно указано время! Используйте s, m, h, d, y !");
-                        break;
-                    }
-                    if (ModerationFunctions.timeOutUser((IUser)options[0].Value, interval, options[2].Value.ToString())) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно отправлен подумать о своём поведении!"); }
-                    else { command.RespondAsync("Не удалось отправить пользователя " + ((IUser)command.Data.Options.First().Value).Username + " думать о своём поведении"); }
-                    break;
-                case "kick":
-                    if (ModerationFunctions.kickUser((IUser)options[0].Value, options[1].Value.ToString())) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно выгнан!"); }
-                    else { command.RespondAsync("Не удалось выгнать пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
-                    break;
-                case "ban":
-                    if (ModerationFunctions.banUser((IUser)options[0].Value,Convert.ToInt32(options[1].Value), options[2].Value.ToString())) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно забанен!"); }
-                    else {command.RespondAsync("Не удалось забанить пользователя " + ((IUser)command.Data.Options.First().Value).Username);}
-                    break;
-                case "unban":
-                    if (ModerationFunctions.unBanUser((IUser)options[0].Value, options[1].Value.ToString())) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно разбанен!"); }
-                    else { command.RespondAsync("Не удалось разбанить пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
-                    break;
                 default:
                     break;
             }
