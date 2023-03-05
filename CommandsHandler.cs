@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using Discord;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Channels;
 
@@ -192,6 +193,17 @@ namespace Discord_Bot
                 locale.Clear();
                 applicationCommandProperties.Add(moveRole.Build());
 
+                var changeRoleColor = new SlashCommandBuilder();
+                locale.Add("ru", "изменитьцветроли");
+                changeRoleColor.WithNameLocalizations(locale);
+                changeRoleColor.WithName("changerolecolor");
+                changeRoleColor.WithDescription("Изменяет цвет указанной роли");
+                changeRoleColor.AddOption("роль", ApplicationCommandOptionType.Role, "Роль, цвет которой надо изменить", true);
+                changeRoleColor.AddOption("цвет", ApplicationCommandOptionType.String, "Новый цвет роли в hex (без #!)", true);
+                changeRoleColor.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                locale.Clear();
+                applicationCommandProperties.Add(changeRoleColor.Build());
+
                 await Program.instance.edenor.BulkOverwriteApplicationCommandAsync(applicationCommandProperties.ToArray());
             }
             catch (Exception e)
@@ -208,14 +220,27 @@ namespace Discord_Bot
             embed.WithColor(new Color(0, 255, 255));
             switch (command.CommandName)
             {
+                case "changerolecolor":
+                    var color = System.Drawing.ColorTranslator.FromHtml($"#{options[1].Value.ToString()}");
+                    foreach (var role in Program.instance.edenor.Roles)
+                    {
+                        if (role.Id == ((SocketRole)options[0].Value).Id)
+                        {
+                            role.ModifyAsync(x =>
+                            {
+                                x.Color = new Discord.Color(color.R, color.G, color.B);
+                            });
+                            command.RespondAsync("Успешно изменили цвет роли!");
+                        }
+                    }
+                    break;
                 case "crashbot":
                     Program.instance.client.LogoutAsync();
                     break;
                 case "moverole":
                     try
                     {
-                        var roles = Program.instance.edenor.Roles;
-                        foreach (var role in roles)
+                        foreach (var role in Program.instance.edenor.Roles)
                         {
                             if (role.Id == ((SocketRole)options[0].Value).Id)
                             {
