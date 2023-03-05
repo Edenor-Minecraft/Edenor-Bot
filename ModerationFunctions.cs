@@ -118,5 +118,15 @@
                 return false;
             }
         }
+
+        public static int getMaxUserRolePosition(SocketGuildUser user)
+        {
+            int max = 0;
+            foreach (var role in user.Roles)
+            {
+                if (role.Position > max) max = role.Position;
+            }
+            return max;
+        }
     }
 }

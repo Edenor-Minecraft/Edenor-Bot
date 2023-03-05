@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Channels;
 
 namespace Discord_Bot
@@ -168,18 +169,28 @@ namespace Discord_Bot
                 setupPPRole.WithDescription("null");
                 applicationCommandProperties.Add(setupPPRole.Build());
 
-                var reconnectAfter = new SlashCommandBuilder();
-                reconnectAfter.WithName("reconnectafter");
-                reconnectAfter.WithDescription("null");
-                reconnectAfter.WithDefaultMemberPermissions(GuildPermission.Administrator);
-                reconnectAfter.AddOption("time_minutes", ApplicationCommandOptionType.Integer, "null", true);
-                applicationCommandProperties.Add(reconnectAfter.Build());
+                var crashBot = new SlashCommandBuilder();
+                crashBot.WithName("crashbot");
+                crashBot.WithDescription("null");
+                crashBot.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                applicationCommandProperties.Add(crashBot.Build());
 
                 var ping = new SlashCommandBuilder();
                 ping.WithName("ping");
                 ping.WithDescription("null");
                 ping.WithDefaultMemberPermissions(GuildPermission.Administrator);
                 applicationCommandProperties.Add(ping.Build());
+
+                var moveRole = new SlashCommandBuilder();
+                locale.Add("ru", "переместитьроль");
+                moveRole.WithNameLocalizations(locale);
+                moveRole.WithName("moverole");
+                moveRole.WithDescription("Перемещает указанную роль на указанное место в списке ролей");
+                moveRole.AddOption("роль", ApplicationCommandOptionType.Role, "Роль, которую надо переместить", true);
+                moveRole.AddOption("позиция", ApplicationCommandOptionType.Integer, "Новая позиция роли", true);
+                moveRole.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                locale.Clear();
+                applicationCommandProperties.Add(moveRole.Build());
 
                 await Program.instance.edenor.BulkOverwriteApplicationCommandAsync(applicationCommandProperties.ToArray());
             }
@@ -197,6 +208,27 @@ namespace Discord_Bot
             embed.WithColor(new Color(0, 255, 255));
             switch (command.CommandName)
             {
+                case "crashbot":
+                    Program.instance.client.LogoutAsync();
+                    break;
+                case "moverole":
+                    try
+                    {
+                        var roles = Program.instance.edenor.Roles;
+                        foreach (var role in roles)
+                        {
+                            if (role.Id == ((SocketRole)options[0].Value).Id)
+                            {
+                                role.ModifyAsync(x =>
+                                {
+                                    x.Position = Convert.ToInt32(options[1].Value);
+                                });
+                                command.RespondAsync("Успешно изменили порядок ролей!");
+                            }
+                        }
+                    }
+                    catch(Exception ex) { command.RespondAsync("Не удалось изменить порядок ролей!"); Program.instance.logError(ex.Message); }
+                    break;
                 case "setuppprole":
                     embed.Title = "Получение роли Игрока Приватки";
                     embed.Description = "Чтобы получить роль, нажмить на кнопку и заполните заявку. Роль выдаётся в течение 24 часов.";
@@ -318,13 +350,27 @@ namespace Discord_Bot
                     break;
 
                 case "kick":
-                    if (ModerationFunctions.kickUser((IUser)options[0].Value, options.ElementAtOrDefault(1))) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно выгнан!"); }
-                    else { command.RespondAsync("Не удалось выгнать пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
+                    if (ModerationFunctions.getMaxUserRolePosition(Program.instance.edenor.GetUser(command.User.Id)) >= ModerationFunctions.getMaxUserRolePosition(Program.instance.edenor.GetUser(((IUser)options[0].Value).Id)))
+                    {
+                        if (ModerationFunctions.kickUser((IUser)options[0].Value, options.ElementAtOrDefault(1))) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно выгнан!"); }
+                        else { command.RespondAsync("Не удалось выгнать пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
+                    }
+                    else
+                    {
+                        command.RespondAsync("Вы не можете выгнать данного пользователя!");
+                    }
                     break;
 
                 case "ban":
-                    if (ModerationFunctions.banUser((IUser)options[0].Value,options.ElementAtOrDefault(1), options.ElementAtOrDefault(2))) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно забанен!"); }
-                    else {command.RespondAsync("Не удалось забанить пользователя " + ((IUser)command.Data.Options.First().Value).Username);}
+                    if (ModerationFunctions.getMaxUserRolePosition(Program.instance.edenor.GetUser(command.User.Id)) >= ModerationFunctions.getMaxUserRolePosition(Program.instance.edenor.GetUser(((IUser)options[0].Value).Id)))
+                    {
+                        if (ModerationFunctions.banUser((IUser)options[0].Value, options.ElementAtOrDefault(1), options.ElementAtOrDefault(2))) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно забанен!"); }
+                        else { command.RespondAsync("Не удалось забанить пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
+                    }
+                    else
+                    {
+                        command.RespondAsync("Вы не можете забанить данного пользователя!");
+                    }
                     break;
 
                 case "unban":
@@ -356,6 +402,13 @@ namespace Discord_Bot
                     embed.WithImageUrl("https://sun9-77.userapi.com/impg/JbpoRqn-xlIGK0lfTrT1-dAx1RlUkLilNm8I1w/_0c0I-NhNrY.jpg?size=518x162&quality=96&sign=327b5827ba9b9d809113f555d3029e92&type=album");
                     embeds[0] = embed.Build();
                     command.RespondAsync("Лови гея", embeds: embeds);
+                    break;
+
+                case "ping":
+                    command.RespondAsync("Понг", options: new RequestOptions()
+                    {
+                        RatelimitCallback = MyRatelimitCallback
+                    });
                     break;
 
                 default:
