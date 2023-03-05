@@ -375,7 +375,7 @@ namespace Discord_Bot
                     break;
 
                 case "kick":
-                    if (ModerationFunctions.getMaxUserRolePosition(Program.instance.edenor.GetUser(command.User.Id)) >= ModerationFunctions.getMaxUserRolePosition(Program.instance.edenor.GetUser(((IUser)options[0].Value).Id)))
+                    if (ModerationFunctions.getMaxUserRolePosition(Program.instance.edenor.GetUser(command.User.Id)) > ModerationFunctions.getMaxUserRolePosition(Program.instance.edenor.GetUser(((IUser)options[0].Value).Id)))
                     {
                         if (ModerationFunctions.kickUser((IUser)options[0].Value, options.ElementAtOrDefault(1))) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно выгнан!"); }
                         else { command.RespondAsync("Не удалось выгнать пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
@@ -387,7 +387,7 @@ namespace Discord_Bot
                     break;
 
                 case "ban":
-                    if (ModerationFunctions.getMaxUserRolePosition(Program.instance.edenor.GetUser(command.User.Id)) >= ModerationFunctions.getMaxUserRolePosition(Program.instance.edenor.GetUser(((IUser)options[0].Value).Id)))
+                    if (ModerationFunctions.getMaxUserRolePosition(Program.instance.edenor.GetUser(command.User.Id)) > ModerationFunctions.getMaxUserRolePosition(Program.instance.edenor.GetUser(((IUser)options[0].Value).Id)))
                     {
                         if (ModerationFunctions.banUser((IUser)options[0].Value, options.ElementAtOrDefault(1), options.ElementAtOrDefault(2))) { command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно забанен!"); }
                         else { command.RespondAsync("Не удалось забанить пользователя " + ((IUser)command.Data.Options.First().Value).Username); }
