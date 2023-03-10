@@ -1,6 +1,7 @@
 ﻿using Discord;
+using System.Reflection.Emit;
 
-namespace Discord_Bot
+namespace Discord_Bot.handlers
 {
     class ModalsHandler
     {
@@ -10,6 +11,29 @@ namespace Discord_Bot
 
             switch (modal.Data.CustomId)
             {
+                case "srv_access":
+                    var srvAccessEmbed = new EmbedBuilder();
+                    srvAccessEmbed.WithColor(new Color(0, 255, 255));
+                    srvAccessEmbed.Title = $"Новая заявка на сервер {DateTime.Now:yyyy-MM-dd HH:mm:ss}!";
+                    srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Ник в Minecraft").WithValue(components.First(x => x.CustomId == "srv_access_nick").Value));
+                    srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Возраст").WithValue(components.First(x => x.CustomId == "srv_access_age").Value));
+                    srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Откуда узнал про сервер").WithValue(components.First(x => x.CustomId == "srv_access_how").Value));
+                    srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Прочёл правила?").WithValue(components.First(x => x.CustomId == "srv_access_read_rules").Value));
+                    srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Вк").WithValue(components.First(x => x.CustomId == "srv_access_vk").Value));
+                    srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Дискорд").WithValue(modal.User.Mention));
+                    var accept = new ButtonBuilder();
+                    accept.CustomId = "accept_srvaccess";
+                    accept.Label = "Принять";
+                    accept.Style = ButtonStyle.Success;
+
+                    var decline = new ButtonBuilder();
+                    decline.CustomId = "decline_srvaccess";
+                    decline.Label = "Отклонить";
+                    decline.Style = ButtonStyle.Danger;
+
+                    ((SocketTextChannel)Program.instance.edenor.GetChannel(1083416534736711680)).SendMessageAsync(modal.User.Mention, embed: srvAccessEmbed.Build(), components: new ComponentBuilder().WithButton(accept).WithButton(decline).Build());
+                    modal.RespondAsync(embed: srvAccessEmbed.Build(), ephemeral: true);
+                    break;
                 case "pp_role_by_request": case "pp_role_purchased":
                     var ppEmbed = new EmbedBuilder();
                     ppEmbed.WithTitle("Получение роли И.П");

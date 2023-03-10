@@ -1,9 +1,6 @@
-﻿using Discord;
-using System.ComponentModel;
-
-namespace Discord_Bot
+﻿namespace Discord_Bot.handlers
 {
-    class SelectMenuModule
+    class SelectMenuHandler
     {
         public static async Task onSelect(SocketMessageComponent arg)
         {

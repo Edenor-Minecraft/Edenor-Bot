@@ -3,8 +3,8 @@
     class NumberCountingModule
     {
 
-        static long lastNumber = 0;
-        private static long lastUser = 0;
+        public static long lastNumber = 0;
+        public static long lastUser = 0;
         static Emoji numberReact = new Emoji("\u2705");
         static string dir = (Environment.CurrentDirectory + "/savedNumber.txt");
 
@@ -37,61 +37,39 @@
 
         public static Task doWork(SocketMessage msg)
         {
-            if (lastNumber == 0)
+            if (!msg.Content.StartsWith("Число") && msg.Author.Id != 710401785663193158)
             {
                 try
                 {
-                    lastNumber = getLastNumber();
+                    if (Convert.ToInt64(msg.Content) == (lastNumber + 1) && lastUser != Convert.ToInt64(msg.Author.Id.ToString()))
+                    {
+                        lastNumber += 1;
+                        lastUser = Convert.ToInt64(msg.Author.Id.ToString());
+                        WriteSetting(lastNumber, lastUser);
+                        msg.AddReactionAsync(numberReact);
+                        giveRole(Convert.ToInt64(msg.Content), msg.Author);
+                        return Task.CompletedTask;
+                    }
+                    else
+                    {
+                        if (msg.Author.Id != 710401785663193158)
+                        {
+                            msg.DeleteAsync();
+                        }
+                        return Task.CompletedTask;
+                    }
                 }
                 catch (Exception e)
-                {
-                    Program.instance.logError("Error while setting up last number " + e.Message);
-                    lastNumber = 0;
-                }
-            }
-
-            if (lastUser == 0)
-            {
-                try
-                {
-                    lastUser = getLastUser();
-                }
-                catch (Exception e)
-                {
-                    Program.instance.logError("Error while setting up last user " + e.Message);
-                    lastUser = 0;
-                }
-            }
-
-            try
-            {
-                if (Convert.ToInt64(msg.Content) == (lastNumber + 1) && lastUser != Convert.ToInt64(msg.Author.Id.ToString()))
-                {
-                    lastNumber += 1;
-                    lastUser = Convert.ToInt64(msg.Author.Id.ToString());
-                    WriteSetting(lastNumber, lastUser);
-                    msg.AddReactionAsync(numberReact);
-                    giveRole(Convert.ToInt64(msg.Content), msg.Author);
-                    return Task.CompletedTask;
-                }
-                else
                 {
                     if (msg.Author.Id != 710401785663193158)
                     {
                         msg.DeleteAsync();
                     }
+                    Program.logError(e.Message);
                     return Task.CompletedTask;
                 }
             }
-            catch (Exception e)
-            {
-                if (msg.Author.Id != 710401785663193158)
-                {
-                    msg.DeleteAsync();
-                }
-                Program.instance.logError(e.Message);
-                return Task.CompletedTask;
-            }
+            else { return Task.CompletedTask; }
         }
 
         private static void giveRole(long number, SocketUser user)
@@ -118,7 +96,7 @@
             File.WriteAllText(dir, number.ToString() + ":" + user.ToString());
         }
 
-        private static long getLastNumber()
+        public static long getLastNumber()
         {
             if (File.Exists(dir))
             {
@@ -135,7 +113,7 @@
             }
         }
 
-        private static long getLastUser()
+        public static long getLastUser()
         {
             if (File.Exists(dir))
             {

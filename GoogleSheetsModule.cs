@@ -32,13 +32,13 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Program.instance.logError(e.Message);
+                Program.logError(e.Message);
             }
         }
 
         public static void timer(object stateInfo)
         {
-            Program.instance.logInfo("Refreshed discord accounts infos");
+            Program.logInfo("Refreshed discord accounts infos");
             ReadEntries();
         }
 
@@ -99,12 +99,12 @@ namespace Discord_Bot
                 }
                 else
                 {
-                    Program.instance.logError("No data found.");
+                    Program.logError("No data found.");
                 }
            }
            catch(Exception e)
            {
-               Program.instance.logError(e.Message + e.StackTrace);
+               Program.logError(e.Message + e.StackTrace);
            }
         }
 
@@ -120,15 +120,15 @@ namespace Discord_Bot
             }
         }
 
-        public static Boolean checkAccepted(/*string discordNick,*/ string minecraftNick)
+        public static Boolean checkAccepted(string minecraftNick)
         {
             try
             {
-                return discordAccountsList[/*discordNick*/minecraftNick]/* && minecraftAccountsList[discordNick].Equals(minecraftNick)*/;
+                return discordAccountsList[minecraftNick];
             }
             catch (Exception e)
             {
-                Program.instance.logError(e.Message);
+                Program.logError(e.Message);
                 return false;
             }
         }

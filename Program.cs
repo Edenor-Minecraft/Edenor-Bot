@@ -9,6 +9,10 @@ global using System.IO;
 global using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Net;
+using Discord.Net;
+using Discord.Rest;
+using MinecraftConnection;
 
 namespace Discord_Bot
 {
@@ -27,6 +31,8 @@ namespace Discord_Bot
 
         private BotConfig config = null;
 
+        public MinecraftCommands rcon;
+
         public Program()
         {
             instance = this;
@@ -36,6 +42,15 @@ namespace Discord_Bot
             string stream = File.ReadAllText(configDir);
             config = JsonSerializer.Deserialize<BotConfig>(stream);
 
+            try
+            {
+                rcon = new MinecraftCommands(config.rconIP, Convert.ToUInt16(config.rconPort), config.rconPassword);
+            }
+            catch (Exception e)
+            {
+                Program.logError(e.Message + e.StackTrace);
+            }
+            
             var socketConfig = new DiscordSocketConfig
             {
                 GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers | GatewayIntents.MessageContent,
@@ -46,11 +61,11 @@ namespace Discord_Bot
             client.MessageReceived += MessagesHandler;
             client.Log += Log;
             client.Ready += onReady;
-            client.SlashCommandExecuted += CommandsHandler.onCommand;
-            client.ButtonExecuted += ButtonsHandler.onButton;
+            client.SlashCommandExecuted += handlers.CommandsHandler.onCommand;
+            client.ButtonExecuted += handlers.ButtonsHandler.onButton;
             client.MessageDeleted += onMessageDeleted;
-            client.ModalSubmitted += ModalsHandler.onModal;
-            client.SelectMenuExecuted += SelectMenuModule.onSelect;
+            client.ModalSubmitted += handlers.ModalsHandler.onModal;
+            client.SelectMenuExecuted += handlers.SelectMenuHandler.onSelect;
 
             GoogleSheetsHelper.setupHelper();
         }
@@ -69,8 +84,34 @@ namespace Discord_Bot
             logTrace("Ready to work, bitches!");
             await client.SetActivityAsync(new StreamingGame("Эденор", "https://edenor.ru/"));
             edenor = client.CurrentUser.MutualGuilds.First(); //Easy access to edenor guild
-            CommandsHandler.setupCommands();
+            handlers.CommandsHandler.setupCommands();
             GoogleSheetsHelper.timer(null);
+
+            if (NumberCountingModule.lastNumber == 0)
+            {
+                try
+                {
+                    NumberCountingModule.lastNumber = NumberCountingModule.getLastNumber();
+                }
+                catch (Exception e)
+                {
+                    logError("Error while setting up last number " + e.Message);
+                    NumberCountingModule.lastNumber = 0;
+                }
+            }
+
+            if (NumberCountingModule.lastUser == 0)
+            {
+                try
+                {
+                    NumberCountingModule.lastUser = NumberCountingModule.getLastUser();
+                }
+                catch (Exception e)
+                {
+                    logError("Error while setting up last user " + e.Message);
+                    NumberCountingModule.lastUser = 0;
+                }
+            }
         }
 
         public void start(object stateInfo)
@@ -128,69 +169,88 @@ namespace Discord_Bot
         }
 
         private static string Timestamp => $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}";
-        public async Task logTrace(string msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
+        public static async Task logTrace(object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
-            if (!ready)
+            msg = msg.ToString();
+            if (!instance.ready)
             {
                 Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [TRACE]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [TRACE]:  {msg}");
+                await ((SocketTextChannel)instance.edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [TRACE]:  {msg}");
             }        
         }
 
-        public async Task logError(string msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
+        public static async Task logError(object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
-            if (!ready)
+            msg = msg.ToString();
+            if (!instance.ready)
             {
                 Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [ERROR]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [ERROR]:  {msg}");
+                await ((SocketTextChannel)instance.edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [ERROR]:  {msg}");
             }
         }
 
-        public async Task logInfo(string msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
+        public static async Task logInfo(object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
-            if (!ready)
+            msg = msg.ToString();
+            if (!instance.ready)
             {
                 Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [INFO]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [INFO]:  {msg}");
+                await ((SocketTextChannel)instance.edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [INFO]:  {msg}");
             }
         }
 
-        public async Task logWarn(string msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
+        public static async Task logWarn(object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
-            if (!ready)
+            msg = msg.ToString();
+            if (((string)msg).Contains("Rate limit triggered"))
+            {
+                instance.client.StopAsync();
+                var waitTimer = new Timer(GoogleSheetsHelper.timer, new AutoResetEvent(false), 10000, 10000);
+            }
+
+            if (!instance.ready)
             {
                 Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [WARN]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [WARN]:  {msg}");
+                await ((SocketTextChannel)instance.edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [WARN]:  {msg}");
             }
         }
 
-        public async Task logCritical (string msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
+        public static async Task logCritical (object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
-            if (!ready)
+            msg = msg.ToString();
+            if (!instance.ready)
             {
                 Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [CRITICAL ERROR]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [CRITICAL ERROR]:  {msg}");
+                await ((SocketTextChannel)instance.edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [CRITICAL ERROR]:  {msg}");
             }
+        }
+
+        public void timer(object stateInfo)
+        {
+            client.StartAsync();
         }
     }
 
     class BotConfig
     {
         public string token { set; get; }
+        public string rconIP { set; get; }
+        public string rconPort { set; get;}
+        public string rconPassword { set; get; }
     }
 }
