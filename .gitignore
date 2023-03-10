@@ -3,3 +3,7 @@ config.json
 bin/*
 ffmpeg/*
 obj/*
+/commands/admin/Текстовый документ.txt
+/commands/funny/Текстовый документ.txt
+/commands/moderation/Текстовый документ.txt
+/commands/other/Текстовый документ.txt
