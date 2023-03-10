@@ -8,7 +8,7 @@ namespace Discord_Bot.commands.moderation
         {
             IUser userToUntimeout = command.Data.Options.First().Value as IUser;
             string reason = $"{command.User.Username}";
-            if (command.Data.Options.ElementAtOrDefault(1).Value != null) 
+            if (command.Data.Options.ElementAtOrDefault(1) != null) 
             {
                 reason = command.Data.Options.ElementAtOrDefault(1).Value.ToString() + $"\n{command.User.Username}";
             }
