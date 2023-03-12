@@ -1,4 +1,6 @@
-﻿namespace Discord_Bot
+﻿using Discord;
+
+namespace Discord_Bot
 {
     class ModerationFunctions
     {
@@ -60,13 +62,17 @@
                 return false;
             }
         }
-        public static Boolean banUser(IUser user, int days, string reason)
+        public static Boolean banUser(IUser iuser, int days, string reason)
         {
             try
             {
+                if (Program.instance.edenor.GetUser(iuser.Id) != null)
+                {
+                    Program.instance.edenor.GetUser(iuser.Id).SendMessageAsync($"Вы были забанены на сервере {Program.instance.edenor.Name} по причине {reason}!");
+                }
                 var options = new RequestOptions();
                 options.AuditLogReason = reason;
-                Program.instance.edenor.AddBanAsync(user, (int)days, reason, options: options);
+                Program.instance.edenor.AddBanAsync(iuser, (int)days, reason, options: options);
                 return true;
             }
             catch(Exception e)
@@ -76,15 +82,17 @@
             }
         }
 
-        public static Boolean timeOutUser(IUser user, TimeSpan? time, string reason)
+        public static Boolean timeOutUser(IUser iuser, TimeSpan? time, string reason)
         {
             try
             {
+                var user = iuser as SocketGuildUser;
                 if (time == null) time = TimeSpan.FromHours(1);
 
                 var options = new RequestOptions();
                 options.AuditLogReason = reason;
-                ((SocketGuildUser)user).SetTimeOutAsync((TimeSpan)time, options);
+                user.SendMessageAsync($"Вы были замучены на сервере {Program.instance.edenor.Name} по причине {reason}!");
+                user.SetTimeOutAsync((TimeSpan)time, options);
                 return true;
             }
             catch (Exception e)
@@ -94,13 +102,15 @@
             }
         }
 
-        public static Boolean kickUser(IUser user, string reason)
+        public static Boolean kickUser(IUser iuser, string reason)
         {
             try
             {
+                var user = iuser as SocketGuildUser;
                 var options = new RequestOptions();
                 options.AuditLogReason = reason;
-                ((SocketGuildUser)user).KickAsync(reason, options: options);
+                user.SendMessageAsync($"Вы были кикнуты с сервера {Program.instance.edenor.Name} по причине {reason}!");
+                user.KickAsync(reason, options: options);
                 return true;
             }
             catch (Exception e)
