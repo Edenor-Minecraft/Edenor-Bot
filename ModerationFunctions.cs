@@ -62,13 +62,13 @@ namespace Discord_Bot
                 return false;
             }
         }
-        public static Boolean banUser(IUser iuser, int days, string reason)
+        public static Boolean banUser(IUser iuser, int days, string reason, bool sendReason = true)
         {
             try
             {
                 if (Program.instance.edenor.GetUser(iuser.Id) != null)
                 {
-                    Program.instance.edenor.GetUser(iuser.Id).SendMessageAsync($"Вы были забанены на сервере {Program.instance.edenor.Name} по причине {reason}!");
+                    Program.instance.edenor.GetUser(iuser.Id).SendMessageAsync($"Вы были забанены на сервере {Program.instance.edenor.Name}{(sendReason ? $" по причине {reason}" : "")}!");
                 }
                 var options = new RequestOptions();
                 options.AuditLogReason = reason;
@@ -82,7 +82,7 @@ namespace Discord_Bot
             }
         }
 
-        public static Boolean timeOutUser(IUser iuser, TimeSpan? time, string reason)
+        public static Boolean timeOutUser(IUser iuser, TimeSpan? time, string reason, bool sendReason = true)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace Discord_Bot
 
                 var options = new RequestOptions();
                 options.AuditLogReason = reason;
-                user.SendMessageAsync($"Вы были замучены на сервере {Program.instance.edenor.Name} по причине {reason}!");
+                user.SendMessageAsync($"Вы были замучены на сервере {Program.instance.edenor.Name}{(sendReason ? $" по причине {reason}" : "")}!");
                 user.SetTimeOutAsync((TimeSpan)time, options);
                 return true;
             }
@@ -102,14 +102,14 @@ namespace Discord_Bot
             }
         }
 
-        public static Boolean kickUser(IUser iuser, string reason)
+        public static Boolean kickUser(IUser iuser, string reason, bool sendReason = true)
         {
             try
             {
                 var user = iuser as SocketGuildUser;
                 var options = new RequestOptions();
                 options.AuditLogReason = reason;
-                user.SendMessageAsync($"Вы были кикнуты с сервера {Program.instance.edenor.Name} по причине {reason}!");
+                user.SendMessageAsync($"Вы были кикнуты с сервера {Program.instance.edenor.Name}{(sendReason ? $" по причине {reason}" : "")}!");
                 user.KickAsync(reason, options: options);
                 return true;
             }

@@ -8,13 +8,17 @@ namespace Discord_Bot.commands.moderation
         {
             IUser userToKick = command.Data.Options.ToList()[0].Value as IUser;
             string reason = $"{command.User.Username}";
-            if (command.Data.Options.ElementAtOrDefault(1) != null)
+            bool showReason = true;
+            foreach (var option in command.Data.Options)
             {
-                reason = command.Data.Options.ElementAtOrDefault(1).Value.ToString() + $"\n{command.User.Username}";
+                if (option.Value is string)
+                    reason = option.Value.ToString();
+                else if (option.Value is bool) 
+                    showReason = (bool)option.Value;
             }
             if (ModerationFunctions.getMaxUserRolePosition(command.User.Id) > ModerationFunctions.getMaxUserRolePosition(userToKick.Id))
             {
-                if (ModerationFunctions.kickUser(userToKick, reason)) 
+                if (ModerationFunctions.kickUser(userToKick, reason, showReason)) 
                 { 
                     await command.RespondAsync("Пользователь " + userToKick.Username + " успешно выгнан!"); 
                 }

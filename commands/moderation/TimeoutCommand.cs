@@ -10,6 +10,7 @@ namespace Discord_Bot.commands.moderation
             IUser user = (IUser)command.Data.Options.ToList()[0].Value;
             string time = "1h";
             string reason = $"{command.User.Username}";
+            bool showReason = true;
             foreach (var option in command.Data.Options)
             {
                 if (option.Value is string)
@@ -20,11 +21,14 @@ namespace Discord_Bot.commands.moderation
                     else
                         reason = val + $"\nBy {command.User.Username}";
                 }
+                else if (option.Value is bool) {
+                    showReason = (bool)option.Value;
+                }
             }
 
             TimeSpan interval = getTimeSpan(time);
             
-            if (ModerationFunctions.timeOutUser(user, interval, reason)) 
+            if (ModerationFunctions.timeOutUser(user, interval, reason, showReason)) 
             { 
                 await command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно отправлен подумать о своём поведении!"); 
             }

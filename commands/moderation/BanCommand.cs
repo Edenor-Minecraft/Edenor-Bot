@@ -7,6 +7,7 @@
             IUser userToBan = command.Data.Options.ToList()[0].Value as IUser;
             int days = 0;
             string reason = $"{command.User.Username}";
+            bool showReason = true;
             foreach (var option in command.Data.Options)
             {
                 var val = option.Value;
@@ -18,10 +19,14 @@
                 {
                     reason = (string)val + $"\n{command.User.Username}";
                 }
+                else if (val is bool)
+                {
+                    showReason = (bool)val;
+                }
             }
             if (ModerationFunctions.getMaxUserRolePosition(command.User.Id) > ModerationFunctions.getMaxUserRolePosition(userToBan.Id))
             {
-                if (ModerationFunctions.banUser(userToBan, days, reason))
+                if (ModerationFunctions.banUser(userToBan, days, reason, showReason))
                 {
                     await command.RespondAsync("Пользователь " + userToBan.Username + " успешно забанен!");
                 }

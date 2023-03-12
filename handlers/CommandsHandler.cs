@@ -37,6 +37,7 @@ namespace Discord_Bot.handlers
                 ban.AddOption("user", ApplicationCommandOptionType.User, "Участник сервера, который будет забанен", true);
                 ban.AddOption("days", ApplicationCommandOptionType.Integer, "Количество дней для удаления сообщений от этого пользователя", false);
                 ban.AddOption("reason", ApplicationCommandOptionType.String, "Причина бана", false);
+                ban.AddOption("sendreason", ApplicationCommandOptionType.Boolean, "Отправить причину бана нарушителю?", false);
                 locale.Clear();
                 applicationCommandProperties.Add(ban.Build());
 
@@ -59,6 +60,7 @@ namespace Discord_Bot.handlers
                 kick.WithDefaultMemberPermissions(GuildPermission.KickMembers);
                 kick.AddOption("user", ApplicationCommandOptionType.User, "Участник сервера, который будет выгнан", true);
                 kick.AddOption("reason", ApplicationCommandOptionType.String, "Причина кика", false);
+                kick.AddOption("sendreason", ApplicationCommandOptionType.Boolean, "Отправить причину кика нарушителю?", false);
                 locale.Clear();
                 applicationCommandProperties.Add(kick.Build());
 
@@ -71,6 +73,7 @@ namespace Discord_Bot.handlers
                 timeout.AddOption("user", ApplicationCommandOptionType.User, "Участник сервера, который будет отправлен думать о своём поведении", true);
                 timeout.AddOption("time", ApplicationCommandOptionType.String, "Время тайм-аута плюс (s, m, h, d) в конце", false);
                 timeout.AddOption("reason", ApplicationCommandOptionType.String, "Причина выдачи тайм-аута", false);
+                timeout.AddOption("sendreason", ApplicationCommandOptionType.Boolean, "Отправить причину таймаута нарушителю?", false);
                 locale.Clear();
                 applicationCommandProperties.Add(timeout.Build());
 
