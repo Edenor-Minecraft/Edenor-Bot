@@ -235,6 +235,12 @@ namespace Discord_Bot.handlers
                 setupSrvAccess.WithDescription("null");
                 applicationCommandProperties.Add(setupSrvAccess.Build());
 
+                var setupbanform = new SlashCommandBuilder();
+                setupbanform.WithName("setupbanform");
+                setupbanform.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                setupbanform.WithDescription("null");
+                applicationCommandProperties.Add(setupbanform.Build());
+
                 await Program.instance.edenor.BulkOverwriteApplicationCommandAsync(applicationCommandProperties.ToArray());
             }
             catch (Exception e)
@@ -246,6 +252,9 @@ namespace Discord_Bot.handlers
         {    
             switch (command.CommandName)
             {
+                case "setupbanform":
+                    await SetupBanForm.onCommand(command);
+                    break;
                 case "setupsrvaccess":
                     await SetupSrvAccessCommand.onCommand(command);
                     break;

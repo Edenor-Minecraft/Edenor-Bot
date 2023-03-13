@@ -8,12 +8,23 @@ namespace Discord_Bot.handlers
         public static async Task onModal(SocketModal modal)
         {
             List<SocketMessageComponentData> components = modal.Data.Components.ToList();
+            var srvAccessEmbed = new EmbedBuilder();
+            srvAccessEmbed.WithColor(new Color(0, 255, 255));
 
             switch (modal.Data.CustomId)
             {
-                case "srv_access":
-                    var srvAccessEmbed = new EmbedBuilder();
-                    srvAccessEmbed.WithColor(new Color(0, 255, 255));
+                case "ban_form":
+                    srvAccessEmbed.Title = $"Новое наказание от {modal.User.Mention}!";
+                    srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Ник нарушителя").WithValue(components.First(x => x.CustomId == "ban_form_nick").Value));
+                    srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Место (дискорд, вк, майнкрафт, тг)").WithValue(components.First(x => x.CustomId == "ban_form_where").Value));
+                    srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Причина").WithValue(components.First(x => x.CustomId == "ban_form_reason").Value));
+                    srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Док-ва (ссылками)").WithValue(components.First(x => x.CustomId == "ban_form_proofs").Value));
+                    srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Кто выдал").WithValue(modal.User.Mention));
+
+                    ((SocketTextChannel)Program.instance.edenor.GetChannel(1084828458569441403)).SendMessageAsync(modal.User.Mention, embed: srvAccessEmbed.Build());
+                    modal.RespondAsync(embed: srvAccessEmbed.Build(), ephemeral: true);
+                    break;
+                case "srv_access":              
                     srvAccessEmbed.Title = $"Новая заявка на сервер {DateTime.Now:yyyy-MM-dd HH:mm:ss}!";
                     srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Ник в Minecraft").WithValue(components.First(x => x.CustomId == "srv_access_nick").Value));
                     srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Возраст").WithValue(components.First(x => x.CustomId == "srv_access_age").Value));
@@ -50,13 +61,13 @@ namespace Discord_Bot.handlers
                     ppEmbed.WithFooter(new EmbedFooterBuilder().WithText(modal.User.Id.ToString()));
                     ppEmbed.WithCurrentTimestamp();
                     ppEmbed.WithColor(new Color(0, 255, 255));
-                   
+
                     var author = new EmbedAuthorBuilder();
                     author.Name = modal.User.Username + "#" + modal.User.Discriminator;
                     author.IconUrl = modal.User.GetAvatarUrl();
 
-                    ppEmbed.WithAuthor(author); 
-                   
+                    ppEmbed.WithAuthor(author);
+
                     var msg = await ((SocketTextChannel)Program.instance.edenor.GetChannel(1055783105916571658)).SendMessageAsync(modal.User.Mention, embed: ppEmbed.Build());
 
                     if (modal.Data.CustomId == "pp_role_by_request")
@@ -70,7 +81,11 @@ namespace Discord_Bot.handlers
                         {
                             msg.AddReactionAsync(new Emoji("\u274C"));
                         }
-                    }               
+                    }
+                    else
+                    {
+                        Program.instance.edenor.GetUser(Convert.ToUInt64(modal.User.Id)).AddRoleAsync(802248363503648899);
+                    }
 
                     modal.RespondAsync(embed: ppEmbed.Build(), ephemeral: true);
                     break;

@@ -33,6 +33,13 @@ namespace Discord_Bot.handlers
                         }
                     }
                     if (minecraftNick == "") return;
+                    var msgEmbed = component.Message.Embeds.FirstOrDefault().ToEmbedBuilder();
+                    msgEmbed.Color = new Color(124, 252, 0);
+                    component.UpdateAsync(msg =>
+                    {
+                        msg.Embed = msgEmbed.Build();
+                        msg.Components = null;
+                    });
                     Program.instance.rcon.SendCommand($"easywhitelist add {minecraftNick}");
                     Program.instance.edenor.GetUser(component.Message.MentionedUsers.First().Id).SendMessageAsync(embed: embed.Build());
                     break;
@@ -40,7 +47,24 @@ namespace Discord_Bot.handlers
                 case "decline_srvaccess":
                     embed.Title = "Здравствуйте, ваша заявка на сервер была отлонена!";
                     embed.Description = "Вы можете купить проходу на сервер на нашем сайте https://edenor.ru/";
+                    var msgEmbed1 = component.Message.Embeds.FirstOrDefault().ToEmbedBuilder();
+                    msgEmbed1.Color = new Color(220, 20, 60);
+                    component.UpdateAsync(msg =>
+                    {
+                        msg.Embed = msgEmbed1.Build();
+                        msg.Components = null;
+                    });
                     Program.instance.edenor.GetUser(component.Message.MentionedUsers.First().Id).SendMessageAsync(embed: embed.Build());
+                    break;
+                case "ban_form_btn":
+                    var mb2 = new ModalBuilder()
+                    .WithTitle("Форма выдачи наказания")
+                    .WithCustomId("ban_form")
+                    .AddTextInput("Ник нарушителя", "ban_form_nick", placeholder: "Steve")
+                    .AddTextInput("Место (дискорд, вк, майнкрафт, тг)", "ban_form_where", placeholder: "Дискорд")
+                    .AddTextInput("Причина", "ban_form_reason", placeholder: "2.4")
+                    .AddTextInput("Док-ва (ссылками)", "ban_form_proofs", placeholder: "Something");
+                    component.RespondWithModalAsync(mb2.Build());
                     break;
                 case "srvaccess_btn":
                     var mb1 = new ModalBuilder()
