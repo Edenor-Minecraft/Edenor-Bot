@@ -14,7 +14,7 @@ namespace Discord_Bot.handlers
             switch (modal.Data.CustomId)
             {
                 case "ban_form":
-                    srvAccessEmbed.Title = $"Новое наказание от {modal.User.Mention}!";
+                    srvAccessEmbed.Title = $"Новое наказание от {modal.User.Username}!";
                     srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Ник нарушителя").WithValue(components.First(x => x.CustomId == "ban_form_nick").Value));
                     srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Место (дискорд, вк, майнкрафт, тг)").WithValue(components.First(x => x.CustomId == "ban_form_where").Value));
                     srvAccessEmbed.AddField(new EmbedFieldBuilder().WithName("Причина").WithValue(components.First(x => x.CustomId == "ban_form_reason").Value));
