@@ -220,7 +220,7 @@ namespace Discord_Bot.handlers
                 saveChannelMessages.AddOption("канал", ApplicationCommandOptionType.Channel, "Канал, который надо сохранить", true);
                 saveChannelMessages.WithDefaultMemberPermissions(GuildPermission.Administrator);
                 locale.Clear();
-                applicationCommandProperties.Add(saveChannelMessages.Build());
+                //applicationCommandProperties.Add(saveChannelMessages.Build());
 
                 var sendCommand = new SlashCommandBuilder();
                 sendCommand.WithName("sendcommand");
