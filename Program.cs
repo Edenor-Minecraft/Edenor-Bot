@@ -13,6 +13,7 @@ using System.Net;
 using Discord.Net;
 using Discord.Rest;
 using MinecraftConnection;
+using MinecraftConnection.RCON;
 
 namespace Discord_Bot
 {
@@ -66,6 +67,8 @@ namespace Discord_Bot
             client.MessageDeleted += onMessageDeleted;
             client.ModalSubmitted += handlers.ModalsHandler.onModal;
             client.SelectMenuExecuted += handlers.SelectMenuHandler.onSelect;
+            client.UserBanned += handlers.BanHandler.onBan;
+            client.UserJoined += handlers.OnGuildJoin.onJoin;
 
             GoogleSheetsHelper.setupHelper();
         }
@@ -77,41 +80,18 @@ namespace Discord_Bot
             await client.StartAsync();
             
             await Task.Delay(Timeout.Infinite);
+            await GoogleSheetsHelper.reloadInfos();
         }
         private async Task onReady()
         {
             ready = true;
             logTrace("Ready to work, bitches!");
-            await client.SetActivityAsync(new StreamingGame("Эденор", "https://edenor.ru/"));
+            var edenGame = new Game("Эденор", ActivityType.Playing, ActivityProperties.Join, "https://edenor.ru/");       
+            await client.SetActivityAsync(edenGame);
             edenor = client.CurrentUser.MutualGuilds.First(); //Easy access to edenor guild
-            handlers.CommandsHandler.setupCommands();
-            GoogleSheetsHelper.timer(null);
+            await handlers.CommandsHandler.setupCommands();
 
-            if (NumberCountingModule.lastNumber == 0)
-            {
-                try
-                {
-                    NumberCountingModule.lastNumber = NumberCountingModule.getLastNumber();
-                }
-                catch (Exception e)
-                {
-                    logError("Error while setting up last number " + e.Message);
-                    NumberCountingModule.lastNumber = 0;
-                }
-            }
-
-            if (NumberCountingModule.lastUser == 0)
-            {
-                try
-                {
-                    NumberCountingModule.lastUser = NumberCountingModule.getLastUser();
-                }
-                catch (Exception e)
-                {
-                    logError("Error while setting up last user " + e.Message);
-                    NumberCountingModule.lastUser = 0;
-                }
-            }
+            await NumberCountingModule.loadAll();
         }
 
         public void start(object stateInfo)
@@ -124,19 +104,19 @@ namespace Discord_Bot
             switch (arg.Severity)
             {
                 case LogSeverity.Critical:
-                    logCritical(arg.ToString());
+                    logCritical(arg.ToString(), arg.Source);
                     break;
                 case LogSeverity.Error:
-                    logError(arg.ToString());
+                    logError(arg.ToString(), arg.Source);
                     break;
                 case LogSeverity.Warning:
-                    logWarn(arg.ToString());
+                    logWarn(arg.ToString(), arg.Source);
                     break;
                 case LogSeverity.Info:
-                    logInfo(arg.ToString());
+                    logInfo(arg.ToString(), arg.Source);
                     break;
                 default:
-                    logTrace(arg.ToString());
+                    logTrace(arg.ToString(), arg.Source);
                     break;
             }
             return Task.CompletedTask;

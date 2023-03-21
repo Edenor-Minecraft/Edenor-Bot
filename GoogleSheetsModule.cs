@@ -12,6 +12,8 @@ namespace Discord_Bot
         static readonly string SpreadsheetId = "1XYpSVHGBwe4PMlp1sWZBFW2ciIORqUjhxAAlqymicj4";
         static readonly string sheet = "Ответы на форму (1)";
         static SheetsService service;
+
+        static bool ready = false;
         public static void setupHelper()
         {
             try
@@ -29,6 +31,8 @@ namespace Discord_Bot
                     HttpClientInitializer = credential,
                     ApplicationName = ApplicationName,
                 });
+
+                ready = true;
             }
             catch (Exception e)
             {
@@ -36,10 +40,22 @@ namespace Discord_Bot
             }
         }
 
+        public static async Task reloadInfos()
+        {
+            if (ready)
+            {
+                Program.logInfo("Refreshing discord accounts infos");
+                ReadEntries();
+            }
+            else
+            {
+                Program.logWarn("GoogleSheets module not initialized!");
+            }
+        }
+
         public static void timer(object stateInfo)
         {
-            Program.logInfo("Refreshed discord accounts infos");
-            ReadEntries();
+            reloadInfos();
         }
 
         static IDictionary<string, bool> discordAccountsList = new Dictionary<string, bool>();
@@ -49,8 +65,7 @@ namespace Discord_Bot
            {
                 discordAccountsList.Clear();
                 var range = $"{sheet}!A:F";
-                SpreadsheetsResource.GetRequest sheetData =
-                        service.Spreadsheets.Get(SpreadsheetId);
+                SpreadsheetsResource.GetRequest sheetData = service.Spreadsheets.Get(SpreadsheetId);
                 sheetData.IncludeGridData = true;
 
                 var execSheetData = sheetData.Execute();
@@ -81,7 +96,7 @@ namespace Discord_Bot
                             nick = row[3].ToString();
                         if (gridRow > values.Count - 1) { break; }
                         bool accepted = false;
-                        if (discordColumn.RowData.ElementAt(gridRow) != null) //Giga null checking
+                        if (discordColumn.RowData.ElementAtOrDefault(gridRow) != null) //Giga null checking
                         {
                             if (discordColumn.RowData.ElementAt(gridRow).Values != null && discordColumn.RowData.ElementAt(gridRow).Values.Count > 2)
                             {
@@ -91,10 +106,14 @@ namespace Discord_Bot
                                 }
                             }                           
                         }                                         
-                        if (discordAccountsList.ContainsKey(nick)) {gridRow += 1; continue; }
-
-                        discordAccountsList.Add(nick, accepted);
-                        gridRow += 1;
+                        if (discordAccountsList.ContainsKey(nick)) {
+                            gridRow += 1;
+                        }
+                        else
+                        {
+                            discordAccountsList.Add(nick, accepted);
+                            gridRow += 1;
+                        }   
                     }
                 }
                 else

@@ -40,7 +40,10 @@ namespace Discord_Bot.handlers
                         msg.Embed = msgEmbed.Build();
                         msg.Components = null;
                     });
-                    Program.instance.rcon.SendCommand($"easywhitelist add {minecraftNick}");
+
+                    if (Program.instance.rcon != null)
+                        Program.instance.rcon.SendCommand($"easywhitelist add {minecraftNick}");
+
                     Program.instance.edenor.GetUser(component.Message.MentionedUsers.First().Id).SendMessageAsync(embed: embed.Build());
                     break;
 

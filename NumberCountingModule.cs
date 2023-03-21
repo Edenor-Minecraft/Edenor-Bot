@@ -8,6 +8,35 @@
         static Emoji numberReact = new Emoji("\u2705");
         static string dir = (Environment.CurrentDirectory + "/savedNumber.txt");
 
+        public static async Task loadAll()
+        {
+            if (lastNumber == 0)
+            {
+                try
+                {
+                    lastNumber = getLastNumber();
+                }
+                catch (Exception e)
+                {
+                    Program.logError("Error while setting up last number " + e.Message);
+                    lastNumber = 0;
+                }
+            }
+
+            if (lastUser == 0)
+            {
+                try
+                {
+                    lastUser = getLastUser();
+                }
+                catch (Exception e)
+                {
+                    Program.logError("Error while setting up last user " + e.Message);
+                    lastUser = 0;
+                }
+            }
+        }
+
         public static async Task onCommand(SocketSlashCommand command)
         {
             switch (command.CommandName)
