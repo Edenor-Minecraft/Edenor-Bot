@@ -81,6 +81,7 @@ namespace Discord_Bot
             
             await Task.Delay(Timeout.Infinite);
             await GoogleSheetsHelper.reloadInfos();
+            await NumberCountingModule.loadAll();
         }
         private async Task onReady()
         {
@@ -90,8 +91,6 @@ namespace Discord_Bot
             await client.SetActivityAsync(edenGame);
             edenor = client.CurrentUser.MutualGuilds.First(); //Easy access to edenor guild
             await handlers.CommandsHandler.setupCommands();
-
-            await NumberCountingModule.loadAll();
         }
 
         public void start(object stateInfo)
