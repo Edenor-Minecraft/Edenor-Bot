@@ -14,6 +14,7 @@ using Discord.Net;
 using Discord.Rest;
 using MinecraftConnection;
 using MinecraftConnection.RCON;
+using OpenAI_API;
 
 namespace Discord_Bot
 {
@@ -22,6 +23,7 @@ namespace Discord_Bot
         public static Program instance = null;
         public DiscordSocketClient client;
         public SocketGuild edenor;
+        public OpenAIAPI openAIAPI;
         static Timer googleTimer;
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
@@ -43,13 +45,24 @@ namespace Discord_Bot
             string stream = File.ReadAllText(configDir);
             config = JsonSerializer.Deserialize<BotConfig>(stream);
 
-            try
+            if (config.rconIP != null && config.rconPort != null && config.rconPassword != null)
             {
-                rcon = new MinecraftCommands(config.rconIP, Convert.ToUInt16(config.rconPort), config.rconPassword);
+                try
+                {
+                    rcon = new MinecraftCommands(config.rconIP, Convert.ToUInt16(config.rconPort), config.rconPassword);
+                }
+                catch (Exception e)
+                {
+                    Program.logError(e.Message + e.StackTrace);
+                }
             }
-            catch (Exception e)
+            
+            if (config.openAIAPIKey != null)
             {
-                Program.logError(e.Message + e.StackTrace);
+                openAIAPI = new OpenAIAPI(new APIAuthentication(config.openAIAPIKey));
+                ChatGPTModule.chat = openAIAPI.Chat.CreateConversation();
+                ChatGPTModule.ready = true;
+                ChatGPTModule.chat.AppendSystemMessage("Ты дискорд бот дискорд сервера по майнкрафт серверу под названием Эденор. Соответственно тебя тоже зовут Эденор. Ты должен помогать игрокам по вопросам игры или давать им совет обращаться к администрации, если ответа на этот вопрос нигде нет.");
             }
             
             var socketConfig = new DiscordSocketConfig
@@ -97,7 +110,6 @@ namespace Discord_Bot
         {
             client.StartAsync();
         }
-
         private Task Log(LogMessage arg)
         {
             switch (arg.Severity)
@@ -120,14 +132,21 @@ namespace Discord_Bot
             }
             return Task.CompletedTask;
         }
-        private Task MessagesHandler(SocketMessage msg)
+        private async Task MessagesHandler(SocketMessage msg)
         {
             if (msg.Channel.Id == 1062273336354275348)
             {
-                return NumberCountingModule.doWork(msg);
+                await NumberCountingModule.doWork(msg);
+                return;
             }
 
-            return Task.CompletedTask;
+            if (msg.Content.Contains($"<@{client.CurrentUser.Id}>"))
+            {
+                await ChatGPTModule.HandleMessage(msg);
+                return;
+            }
+
+            return;
         }
 
         private Task onMessageDeleted(Cacheable<IMessage, ulong> arg1, Cacheable<IMessageChannel, ulong> arg2)
@@ -231,5 +250,6 @@ namespace Discord_Bot
         public string rconIP { set; get; }
         public string rconPort { set; get;}
         public string rconPassword { set; get; }
+        public string openAIAPIKey { set; get; }
     }
 }
