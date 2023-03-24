@@ -14,7 +14,7 @@ namespace Discord_Bot
                 var channel = msg.Channel as ISocketMessageChannel;
                 if (!ready)
                 {
-                    await channel.SendMessageAsync("Модуль ChatGPT не работает в данный момент! \n:( ", messageReference: msg.Reference);
+                    await channel.SendMessageAsync("Модуль ИИ не работает в данный момент! \n:( ", messageReference: msg.Reference);
                     return;
                 }
                 else

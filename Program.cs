@@ -62,7 +62,6 @@ namespace Discord_Bot
             {
                 openAIAPI = new OpenAIAPI(new APIAuthentication(config.openAIAPIKey));
                 ChatGPTModule.chat = openAIAPI.Chat.CreateConversation();
-                ChatGPTModule.chat.Model = Model.DavinciText;
                 ChatGPTModule.ready = true;
                 ChatGPTModule.chat.AppendSystemMessage("Ты дискорд бот дискорд сервера по майнкрафт серверу под названием Эденор. Соответственно тебя тоже зовут Эденор. Ты должен помогать игрокам по вопросам игры или давать им совет обращаться к администрации, если ответа на этот вопрос нигде нет.");
             }
