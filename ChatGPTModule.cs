@@ -1,4 +1,6 @@
-﻿using OpenAI_API.Chat;
+﻿using Discord;
+using OpenAI_API.Chat;
+using System.Reflection;
 
 namespace Discord_Bot
 {
@@ -23,10 +25,26 @@ namespace Discord_Bot
                     chat.AppendUserInput(msgContent);
                     var responce = await chat.GetResponseFromChatbot();
                     await channel.SendMessageAsync($"{msg.Author.Mention} {responce}", messageReference: msg.Reference);
+                    /*try
+                    {
+                        if (chat.GetType().GetProperty("_Messages", BindingFlags.Instance | BindingFlags.NonPublic) != null)
+                        {
+                            List<ChatMessage> _messages = chat.GetType().GetProperty("_Messages", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(chat) as List<ChatMessage>;
+                            if (_messages.Count > 3)
+                            {
+                                _messages.RemoveAt(0);
+                                chat.GetType().GetProperty("_Messages", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(chat, _messages);
+                            }
+                        }
+                    }   
+                    catch(Exception ex)
+                    {
+                        Program.logError("Failed to remove first messages!" + ex.Message + ex.StackTrace);
+                    }*/
+                    
                     return;
                 }
             }
-            
         }
     }
 }

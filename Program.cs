@@ -37,6 +37,8 @@ namespace Discord_Bot
 
         public MinecraftCommands rcon;
 
+        static bool enableCommands = true;
+
         public Program()
         {
             instance = this;
@@ -54,17 +56,18 @@ namespace Discord_Bot
                 }
                 catch (Exception e)
                 {
-                    Program.logError(e.Message + e.StackTrace);
+                    logError(e.Message + e.StackTrace);
                 }
             }
             
-            if (config.openAIAPIKey != null)
+            /*if (config.openAIAPIKey != null)
             {
                 openAIAPI = new OpenAIAPI(new APIAuthentication(config.openAIAPIKey));
+                openAIAPI.Chat.DefaultChatRequestArgs = new OpenAI_API.Chat.ChatRequest() { Model = Model.ChatGPTTurbo, MaxTokens = 5};
                 ChatGPTModule.chat = openAIAPI.Chat.CreateConversation();
                 ChatGPTModule.ready = true;
                 ChatGPTModule.chat.AppendSystemMessage("Ты дискорд бот дискорд сервера по майнкрафт серверу под названием Эденор. Соответственно тебя тоже зовут Эденор. Ты должен помогать игрокам по вопросам игры или давать им совет обращаться к администрации, если ответа на этот вопрос нигде нет.");
-            }
+            }*/
             
             var socketConfig = new DiscordSocketConfig
             {
@@ -96,6 +99,26 @@ namespace Discord_Bot
             await Task.Delay(Timeout.Infinite);
             await GoogleSheetsHelper.reloadInfos();
             await NumberCountingModule.loadAll();
+
+            while (enableCommands)
+            {
+                if (Console.ReadLine() != null)
+                {
+                    string cmd = Console.ReadLine();
+                    if (cmd == "exit")
+                    {
+                        try
+                        {
+                            logInfo("Trying to kill bot process");
+                            Process.GetCurrentProcess().Kill();
+                        }
+                        catch(Exception ex)
+                        {
+                            logError("Failed to kill bot process!\n" + ex.Message + ex.StackTrace);
+                        }
+                    }
+                }
+            }
         }
         private async Task onReady()
         {
@@ -141,11 +164,11 @@ namespace Discord_Bot
                 return;
             }
 
-            if (msg.Content.Contains($"<@{client.CurrentUser.Id}>"))
+            /*if (msg.Content.Contains($"<@{client.CurrentUser.Id}>"))
             {
                 await ChatGPTModule.HandleMessage(msg);
                 return;
-            }
+            }*/
 
             return;
         }
