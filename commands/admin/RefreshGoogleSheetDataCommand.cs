@@ -4,15 +4,22 @@
     {
         public static async new Task onCommand(SocketSlashCommand command)
         {
+            await command.RespondAsync("Перезагружаем данные таблицы");
             try
-            {
-                GoogleSheetsHelper.timer(null);
-                await command.RespondAsync("Успешно перезагрузили данные таблицы");
+            {   
+                GoogleSheetsHelper.reloadInfos();
+                await command.ModifyOriginalResponseAsync(x =>
+                {
+                    x.Content = "Успешно перезагрузили данные таблицы";
+                });
             }
             catch (Exception e)
             {
                 Program.logTrace(e.Message);
-                await command.RespondAsync("Не удалось перезагрузить данные таблицы");
+                await command.ModifyOriginalResponseAsync(x =>
+                {
+                    x.Content = "Не удалось перезагрузить данные таблицы";
+                });
             }
         }
     }

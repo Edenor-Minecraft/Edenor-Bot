@@ -81,8 +81,7 @@ namespace Discord_Bot
                     }
                 }
 
-                SpreadsheetsResource.ValuesResource.GetRequest request =
-                        service.Spreadsheets.Values.Get(SpreadsheetId, range);
+                SpreadsheetsResource.ValuesResource.GetRequest request = service.Spreadsheets.Values.Get(SpreadsheetId, range);
 
                 var response = request.Execute();
                 IList<IList<object>> values = response.Values;
@@ -91,6 +90,7 @@ namespace Discord_Bot
                 {
                     foreach (var row in values)
                     {
+                        if (values.IndexOf(row) == 0) continue;
                         string nick = "";
                         if (row.Count > 3)
                             nick = row[3].ToString();
@@ -98,11 +98,16 @@ namespace Discord_Bot
                         bool accepted = false;
                         if (discordColumn.RowData.ElementAtOrDefault(gridRow) != null) //Giga null checking
                         {
-                            if (discordColumn.RowData.ElementAt(gridRow).Values != null && discordColumn.RowData.ElementAt(gridRow).Values.Count > 2)
+                            if (discordColumn.RowData.ElementAtOrDefault(gridRow).Values != null && discordColumn.RowData.ElementAtOrDefault(gridRow).Values.Count > 2)
                             {
-                                if (discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat != null)
+                                if (discordColumn.RowData.ElementAtOrDefault(gridRow).Values[2].UserEnteredFormat != null)
                                 {
-                                    accepted = checkColor(discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Red.GetValueOrDefault(1), discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Blue.GetValueOrDefault(1), discordColumn.RowData.ElementAt(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle.RgbColor.Green.GetValueOrDefault(1));
+                                    var colorStyle = discordColumn.RowData.ElementAtOrDefault(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle;
+                                    float red = colorStyle.RgbColor.Red == null ? 1 : colorStyle.RgbColor.Red.Value;
+                                    float blue = colorStyle.RgbColor.Blue == null ? 1 : colorStyle.RgbColor.Blue.Value;
+                                    float green = colorStyle.RgbColor.Green == null ? 1 : colorStyle.RgbColor.Green.Value;
+                                        
+                                    accepted = checkColor(red, blue, green);
                                 }
                             }                           
                         }                                         
