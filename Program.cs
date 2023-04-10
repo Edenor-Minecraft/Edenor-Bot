@@ -16,6 +16,8 @@ using MinecraftConnection;
 using MinecraftConnection.RCON;
 using OpenAI_API;
 using OpenAI_API.Models;
+using Discord_Bot.handlers;
+using System.Net.Http;
 
 namespace Discord_Bot
 {
@@ -38,6 +40,8 @@ namespace Discord_Bot
         public MinecraftCommands rcon;
 
         static bool enableCommands = true;
+
+        CallbackAPIHandler callbackAPI;
 
         public Program()
         {
@@ -91,6 +95,9 @@ namespace Discord_Bot
         }
         private async Task MainAsync()
         {
+            /*callbackAPI = new CallbackAPIHandler();
+            await callbackAPI.startHost();*/
+
             var token = config.token;
 
             await client.LoginAsync(TokenType.Bot, token);

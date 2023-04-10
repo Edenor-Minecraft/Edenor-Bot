@@ -114,8 +114,8 @@ namespace Discord_Bot
                                 }
                             }
                         }
-                        catch(Exception ex) { 
-                            Program.logError(ex.Message + ex.StackTrace)
+                        catch(Exception ex) {
+                            Program.logError(ex.Message + ex.StackTrace);
                         }
                                                                 
                         if (discordAccountsList.ContainsKey(nick)) {
