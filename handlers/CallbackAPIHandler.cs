@@ -29,7 +29,7 @@ namespace Discord_Bot.handlers
             .Build();         
         }
         
-        public async startHost()
+        public async Task startHost()
         {
             host.Run();
         }

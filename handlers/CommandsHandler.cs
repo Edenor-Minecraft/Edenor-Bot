@@ -241,6 +241,16 @@ namespace Discord_Bot.handlers
                 setupbanform.WithDescription("null");
                 applicationCommandProperties.Add(setupbanform.Build());
 
+                var getIPInfo = new SlashCommandBuilder();
+                locale.Add("ru", "получитьинфуоip");
+                saveChannelMessages.WithNameLocalizations(locale);
+                getIPInfo.WithName("getipinfo");
+                getIPInfo.WithDefaultMemberPermissions(GuildPermission.Administrator);
+                getIPInfo.AddOption("айпи", ApplicationCommandOptionType.String, "Айпи, информацию о котором надо получить", true);
+                getIPInfo.WithDescription("Получает информацию об IP адрессе");
+                locale.Clear();
+                applicationCommandProperties.Add(getIPInfo.Build());
+
                 await Program.instance.edenor.BulkOverwriteApplicationCommandAsync(applicationCommandProperties.ToArray());
             }
             catch (Exception e)
@@ -252,6 +262,9 @@ namespace Discord_Bot.handlers
         {    
             switch (command.CommandName)
             {
+                case "getipinfo":
+                    await GetIPInfoCommand.onCommand(command);
+                    break;
                 case "setupbanform":
                     await SetupBanForm.onCommand(command);
                     break;
