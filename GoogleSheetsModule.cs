@@ -96,21 +96,28 @@ namespace Discord_Bot
                             nick = row[3].ToString();
                         if (gridRow > values.Count - 1) { break; }
                         bool accepted = false;
-                        if (discordColumn.RowData.ElementAtOrDefault(gridRow) != null) //Giga null checking
+                        try
                         {
-                            if (discordColumn.RowData.ElementAtOrDefault(gridRow).Values != null && discordColumn.RowData.ElementAtOrDefault(gridRow).Values.Count > 2)
+                            if (discordColumn.RowData.ElementAtOrDefault(gridRow) != null) //Giga null checking
                             {
-                                if (discordColumn.RowData.ElementAtOrDefault(gridRow).Values[2].UserEnteredFormat != null)
+                                if (discordColumn.RowData.ElementAtOrDefault(gridRow).Values != null && discordColumn.RowData.ElementAtOrDefault(gridRow).Values.Count > 2)
                                 {
-                                    var colorStyle = discordColumn.RowData.ElementAtOrDefault(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle;
-                                    float red = colorStyle.RgbColor.Red == null ? 1 : colorStyle.RgbColor.Red.Value;
-                                    float blue = colorStyle.RgbColor.Blue == null ? 1 : colorStyle.RgbColor.Blue.Value;
-                                    float green = colorStyle.RgbColor.Green == null ? 1 : colorStyle.RgbColor.Green.Value;
-                                        
-                                    accepted = checkColor(red, blue, green);
+                                    if (discordColumn.RowData.ElementAtOrDefault(gridRow).Values[2].UserEnteredFormat != null)
+                                    {
+                                        var colorStyle = discordColumn.RowData.ElementAtOrDefault(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle;
+                                        float red = colorStyle.RgbColor.Red == null ? 1 : colorStyle.RgbColor.Red.Value;
+                                        float blue = colorStyle.RgbColor.Blue == null ? 1 : colorStyle.RgbColor.Blue.Value;
+                                        float green = colorStyle.RgbColor.Green == null ? 1 : colorStyle.RgbColor.Green.Value;
+
+                                        accepted = checkColor(red, blue, green);
+                                    }
                                 }
-                            }                           
-                        }                                         
+                            }
+                        }
+                        catch(Exception ex) { 
+                            Program.logError(ex.Message + ex.StackTrace)
+                        }
+                                                                
                         if (discordAccountsList.ContainsKey(nick)) {
                             gridRow += 1;
                         }
@@ -134,7 +141,9 @@ namespace Discord_Bot
 
         private static Boolean checkColor(float red, float blue, float green)
         {
-            if (Math.Round(red, 1, MidpointRounding.AwayFromZero) == 0.4 && Math.Round(blue, 1, MidpointRounding.AwayFromZero) == 0.3 && Math.Round(green, 1, MidpointRounding.AwayFromZero) == 0.7)
+            if (Math.Round(red, 1, MidpointRounding.AwayFromZero) == 0.4 
+                && Math.Round(blue, 1, MidpointRounding.AwayFromZero) == 0.3 
+                && Math.Round(green, 1, MidpointRounding.AwayFromZero) == 0.7)
             {
                 return true;
             }
@@ -152,7 +161,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Program.logError(e.Message);
+                Program.logError(e.Message + e.StackTrace);
                 return false;
             }
         }
