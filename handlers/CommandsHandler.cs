@@ -243,7 +243,7 @@ namespace Discord_Bot.handlers
 
                 var getIPInfo = new SlashCommandBuilder();
                 locale.Add("ru", "получитьинфуоip");
-                saveChannelMessages.WithNameLocalizations(locale);
+                getIPInfo.WithNameLocalizations(locale);
                 getIPInfo.WithName("getipinfo");
                 getIPInfo.WithDefaultMemberPermissions(GuildPermission.Administrator);
                 getIPInfo.AddOption("айпи", ApplicationCommandOptionType.String, "Айпи, информацию о котором надо получить", true);
