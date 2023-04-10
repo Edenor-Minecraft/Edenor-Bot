@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Discord_Bot.handlers
 {
-    internal class CallbackAPIHandler
+    /*internal class CallbackAPIHandler
     {
         public IWebHost host;
         public CallbackAPIHandler() {
@@ -33,5 +33,5 @@ namespace Discord_Bot.handlers
         {
             host.Run();
         }
-    }
+    }*/
 }

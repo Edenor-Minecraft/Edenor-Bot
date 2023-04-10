@@ -41,7 +41,7 @@ namespace Discord_Bot
 
         static bool enableCommands = true;
 
-        CallbackAPIHandler callbackAPI;
+        //CallbackAPIHandler callbackAPI;
 
         public Program()
         {
