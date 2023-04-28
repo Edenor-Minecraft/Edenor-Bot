@@ -16,6 +16,34 @@ namespace Discord_Bot.handlers
             embed.WithAuthor(author);
             switch (component.Data.CustomId)
             {
+                case "close_tct_cl_bttn":
+                    embed.Author = new EmbedAuthorBuilder() { IconUrl = component.User.GetAvatarUrl(), Name = component.User.Username };
+                    embed.WithDescription("Жалоба была успешно закрыта!");
+                    embed.Title = "Жалоба закрыта";
+                    component.Message.ModifyAsync(x =>
+                    {
+                        x.Embed = embed.Build();
+                        x.Components = null;
+                    });
+                    SocketThreadChannel thread = component.Channel as SocketThreadChannel;
+                    thread.ModifyAsync(x =>
+                    {
+                        x.Locked = true;
+                    });
+                    break;
+                case "close_ticket_bttn":
+                    embed.WithDescription("Пожалуйста, подтвердите, что вы хотите закрыть данное обращение.");
+                    embed.Title = "Подтверждение закрытия";
+                    embed.Author = new EmbedAuthorBuilder() { IconUrl = component.User.GetAvatarUrl(), Name = component.User.Username };
+
+                    var close_cl_bttn = new ButtonBuilder()
+                    {
+                        Label = $"{new Emoji("\u2714")}Закрыть",
+                        Style = ButtonStyle.Primary,
+                        CustomId = "close_tct_cl_bttn"
+                    };
+                    await component.RespondAsync(embed: embed.Build(), components: new ComponentBuilder().WithButton(close_cl_bttn).Build());
+                    break;
                 case "accept_srvaccess": 
                     embed.Title = "Здравствуйте, ваша заявка на сервер была одобрена!";
                     embed.Description = "Советую ознакомиться с правилами на сайте! \nАйпи сервера: \nJava - mc.edenor.ru или play.edenor.ru \nBedrock - pe.edenor.ru(порт 25565)"; 

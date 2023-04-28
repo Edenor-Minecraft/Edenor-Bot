@@ -251,6 +251,15 @@ namespace Discord_Bot.handlers
                 locale.Clear();
                 applicationCommandProperties.Add(getIPInfo.Build());
 
+                var closeTicket = new SlashCommandBuilder();
+                locale.Add("ru", "закрытьтикет");
+                closeTicket.WithNameLocalizations(locale);
+                closeTicket.WithName("closeticket");
+                closeTicket.WithDefaultMemberPermissions(GuildPermission.ManageThreads);
+                closeTicket.WithDescription("Закрывает тикет, в котором прописана команда");
+                locale.Clear();
+                applicationCommandProperties.Add(closeTicket.Build());
+
                 await Program.instance.edenor.BulkOverwriteApplicationCommandAsync(applicationCommandProperties.ToArray());
             }
             catch (Exception e)
@@ -262,6 +271,9 @@ namespace Discord_Bot.handlers
         {    
             switch (command.CommandName)
             {
+                case "closeticket":
+                    await CloseTicketCommand.onCommand(command);
+                    break;
                 case "getipinfo":
                     await GetIPInfoCommand.onCommand(command);
                     break;

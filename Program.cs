@@ -18,12 +18,14 @@ using OpenAI_API;
 using OpenAI_API.Models;
 using Discord_Bot.handlers;
 using System.Net.Http;
+using Discord.Webhook;
 
 namespace Discord_Bot
 {
     class Program
     {
         public static Program instance = null;
+        private DiscordWebhookClient loggerWebhook;
         public DiscordSocketClient client;
         public SocketGuild edenor;
         public OpenAIAPI openAIAPI;
@@ -47,10 +49,15 @@ namespace Discord_Bot
         {
             instance = this;
 
-            googleTimer = new Timer(GoogleSheetsHelper.timer, new AutoResetEvent(true), 1000, 1800000);
-
             string stream = File.ReadAllText(configDir);
             config = JsonSerializer.Deserialize<BotConfig>(stream);
+
+            if (config.loggerWebhookURL != null)
+            {
+                loggerWebhook = new DiscordWebhookClient(config.loggerWebhookURL);
+            }
+
+            googleTimer = new Timer(GoogleSheetsHelper.timer, new AutoResetEvent(true), 1000, 1800000);
 
             if (config.rconIP != null && config.rconPort != null && config.rconPassword != null)
             {
@@ -90,6 +97,7 @@ namespace Discord_Bot
             client.SelectMenuExecuted += handlers.SelectMenuHandler.onSelect;
             client.UserBanned += handlers.BanHandler.onBan;
             client.UserJoined += handlers.OnGuildJoin.onJoin;
+            client.ThreadCreated += TicketHandler.onNewThread;
 
             GoogleSheetsHelper.setupHelper();
         }
@@ -201,71 +209,64 @@ namespace Discord_Bot
         public static async Task logTrace(object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
             msg = msg.ToString();
-            if (!instance.ready)
+            if (instance.loggerWebhook == null)
             {
                 Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [TRACE]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)instance.edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [TRACE]:  {msg}");
+                await instance.loggerWebhook.SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [TRACE]:  {msg}");
             }        
         }
 
         public static async Task logError(object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
             msg = msg.ToString();
-            if (!instance.ready)
+            if (instance.loggerWebhook == null)
             {
                 Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [ERROR]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)instance.edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [ERROR]:  {msg}");
+                await instance.loggerWebhook.SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [ERROR]:  {msg}");
             }
         }
 
         public static async Task logInfo(object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
             msg = msg.ToString();
-            if (!instance.ready)
+            if (instance.loggerWebhook == null)
             {
                 Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [INFO]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)instance.edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [INFO]:  {msg}");
+                await instance.loggerWebhook.SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [INFO]:  {msg}");
             }
         }
 
         public static async Task logWarn(object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
-            msg = msg.ToString();
-            if (((string)msg).Contains("Rate limit triggered"))
-            {
-                instance.client.StopAsync();
-                var waitTimer = new Timer(GoogleSheetsHelper.timer, new AutoResetEvent(false), 10000, 10000);
-            }
-
-            if (!instance.ready)
+            if (instance.loggerWebhook == null)
             {
                 Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [WARN]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)instance.edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [WARN]:  {msg}");
+                await instance.loggerWebhook.SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [WARN]:  {msg}");
             }
         }
 
         public static async Task logCritical (object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
         {
             msg = msg.ToString();
-            if (!instance.ready)
+            if (instance.loggerWebhook == null)
             {
                 Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [CRITICAL ERROR]:  {msg}");
             }
             else
             {
-                await ((SocketTextChannel)instance.edenor.GetChannel(1065968855878475777)).SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [CRITICAL ERROR]:  {msg}");
+                await instance.loggerWebhook.SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [CRITICAL ERROR]:  {msg}");
             }
         }
 
@@ -282,5 +283,7 @@ namespace Discord_Bot
         public string rconPort { set; get;}
         public string rconPassword { set; get; }
         public string openAIAPIKey { set; get; }
+
+        public string loggerWebhookURL { set; get; }
     }
 }
