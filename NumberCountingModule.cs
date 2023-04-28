@@ -60,6 +60,7 @@
             if (Convert.ToInt64(msg.Content) == lastNumber)
             {
                 ((SocketTextChannel)Program.instance.edenor.GetChannel(channel.Id)).SendMessageAsync($"Число {msg.Content}, отправленное {msg.Author.Username}, было удалено. Следующее число - {Convert.ToInt64(msg.Content) + 1}");
+                WriteSetting(lastNumber, (long)msg.Author.Id);
             }
             return Task.CompletedTask;        
         }
@@ -90,6 +91,7 @@
                 }
                 catch (Exception e)
                 {
+                    if (e.Message.Contains("Input string was not in a correct format.")) return Task.CompletedTask;
                     if (msg.Author.Id != 710401785663193158)
                     {
                         msg.DeleteAsync();
