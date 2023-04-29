@@ -97,7 +97,7 @@ namespace Discord_Bot
             client.SelectMenuExecuted += handlers.SelectMenuHandler.onSelect;
             client.UserBanned += handlers.BanHandler.onBan;
             client.UserJoined += handlers.OnGuildJoin.onJoin;
-            client.ThreadCreated += TicketHandler.onNewThread;
+            //client.ThreadCreated += TicketHandler.onNewThread;
 
             GoogleSheetsHelper.setupHelper();
         }
