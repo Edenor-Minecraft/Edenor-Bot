@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using Discord_Bot.handlers;
+using Microsoft.AspNetCore.WebUtilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,6 +13,20 @@ namespace Discord_Bot.commands.admin
 {
     internal class GetIPInfoCommand : BaseCommandClass
     {
+        public GetIPInfoCommand() {
+            var getIPInfo = new SlashCommandBuilder();
+            locale.Add("ru", "получитьинфуоip");
+            getIPInfo.WithNameLocalizations(locale);
+            getIPInfo.WithName("getipinfo");
+            getIPInfo.WithDefaultMemberPermissions(GuildPermission.Administrator);
+            getIPInfo.AddOption("айпи", ApplicationCommandOptionType.String, "Айпи, информацию о котором надо получить", true);
+            getIPInfo.WithDescription("Получает информацию об IP адрессе");
+            locale.Clear();
+
+            commandProperties = getIPInfo.Build();
+
+            CommandsHandler.OnCommand += onCommand;
+        }
         static string baseURl = $"http://ip-api.com/json/";
         static string responseParams = "?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,asname,reverse,mobile,proxy,hosting,query&lang=ru";
 
@@ -22,11 +37,15 @@ namespace Discord_Bot.commands.admin
             UseProxy = false
         });
 
-        public static new async Task onCommand(SocketSlashCommand command)
+        public override async Task onCommand(SocketSlashCommand command)
         {
+            if (command.CommandName != commandProperties.Name.Value) return;
+
             string ip = command.Data.Options.ToList()[0].Value.ToString();
 
-            await command.RespondAsync($"Собираем информацию об IP {ip}");
+            await command.ModifyOriginalResponseAsync(x => {
+                x.Content = $"Собираем информацию об IP {ip}";
+            });
 
             await command.ModifyOriginalResponseAsync(x => {
                 x.Content = doTask(ip).Result;

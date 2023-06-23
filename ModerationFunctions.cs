@@ -1,9 +1,46 @@
 ﻿using Discord;
+using System.Collections.Generic;
 
 namespace Discord_Bot
 {
     class ModerationFunctions
     {
+        public static Boolean warnUser(IUser user, string reason, bool sendReason)
+        {
+            try
+            {
+                var userData = Program.instance.userDatabase.GetUserData(user.Id).Result;
+                if (userData != null)
+                {
+                    userData.WarnData.WarnCount += 1;
+                    if (userData.WarnData.WarnCount >= 3)
+                    {
+                        userData.WarnData.WarnCount = 0;
+                        userData.WarnData.WarnEnds.Clear();
+                        banUser(user, 0, "Превышено максимально количество предупреждений за нарушения!", true);
+                    }
+                    else
+                    {
+                        userData.WarnData.WarnEnds.Add(new handlers.WarnDataTimes(DateTime.Now));
+                        if (sendReason && reason != null)
+                        {
+                            Program.instance.edenor.GetUser(user.Id).SendMessageAsync("Вы получили предупреждение по причине: " + reason);
+                        }
+                    }
+                    Program.instance.userDatabase.ModifyUserData(user.Id, userData);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                Program.logError("Failed to warn user " + e.Message);
+                return false;
+            }
+        }
         public static Boolean giveRole(IUser user, long roleId)
         {
             try
@@ -66,13 +103,17 @@ namespace Discord_Bot
         {
             try
             {
-                if (Program.instance.edenor.GetUser(iuser.Id) != null)
-                {
-                    Program.instance.edenor.GetUser(iuser.Id).SendMessageAsync($"Вы были забанены на сервере {Program.instance.edenor.Name}{(sendReason ? $" по причине {reason}" : "")}!");
-                }
                 var options = new RequestOptions();
                 options.AuditLogReason = reason;
-                Program.instance.edenor.AddBanAsync(iuser, (int)days, reason, options: options);
+                if (Program.instance.edenor.GetUser(iuser.Id).SendMessageAsync($"Вы были забанены на сервере {Program.instance.edenor.Name}{(sendReason ? $" по причине {reason}" : "")}!").Result != null)
+                {
+                    Program.instance.edenor.AddBanAsync(iuser, (int)days, reason, options: options);
+                }
+                else
+                {
+                    Program.logError("Не удалось отправить причину бана пользователю!");
+                    Program.instance.edenor.AddBanAsync(iuser, (int)days, reason, options: options);
+                }
                 return true;
             }
             catch(Exception e)
@@ -109,8 +150,15 @@ namespace Discord_Bot
                 var user = iuser as SocketGuildUser;
                 var options = new RequestOptions();
                 options.AuditLogReason = reason;
-                user.SendMessageAsync($"Вы были кикнуты с сервера {Program.instance.edenor.Name}{(sendReason ? $" по причине {reason}" : "")}!");
-                user.KickAsync(reason, options: options);
+                if (user.SendMessageAsync($"Вы были кикнуты с сервера {Program.instance.edenor.Name}{(sendReason ? $" по причине {reason}" : "")}!").Result != null)
+                {
+                    user.KickAsync(reason, options: options);
+                }
+                else
+                {
+                    Program.logError("Не удалось отправить причину кика пользователю!");
+                    user.KickAsync(reason, options: options);
+                }
                 return true;
             }
             catch (Exception e)

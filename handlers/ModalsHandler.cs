@@ -68,7 +68,7 @@ namespace Discord_Bot.handlers
 
                     ppEmbed.WithAuthor(author);
 
-                    var msg = await ((SocketTextChannel)Program.instance.edenor.GetChannel(1055783105916571658)).SendMessageAsync(modal.User.Mention, embed: ppEmbed.Build());
+                    var msg = await ((SocketTextChannel)Program.instance.edenor.GetChannel(1121791250312478731)).SendMessageAsync(modal.User.Mention, embed: ppEmbed.Build());
 
                     if (modal.Data.CustomId == "pp_role_by_request")
                     {

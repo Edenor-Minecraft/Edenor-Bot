@@ -1,9 +1,29 @@
-﻿namespace Discord_Bot.commands.moderation
+﻿using Discord_Bot.handlers;
+
+namespace Discord_Bot.commands.moderation
 {
     public class GiveRoleCommand : BaseCommandClass
     {
-        public static async new Task onCommand(SocketSlashCommand command)
+        public GiveRoleCommand() {
+            var giveRole = new SlashCommandBuilder();
+            locale.Add("ru", "датьроль");
+            giveRole.WithName("giverole");
+            giveRole.WithNameLocalizations(locale);
+            giveRole.WithDescription("Изменить роль человека");
+            giveRole.WithDefaultMemberPermissions(GuildPermission.Administrator);
+            giveRole.AddOption("user", ApplicationCommandOptionType.User, "Человек, которому надо дать роль", true);
+            giveRole.AddOption("role", ApplicationCommandOptionType.Role, "Роль, которую надо выдать", true);
+            giveRole.AddOption("take", ApplicationCommandOptionType.Boolean, "Забрать роль?", true);
+            locale.Clear();
+
+            commandProperties = giveRole.Build();
+
+            CommandsHandler.OnCommand += onCommand;
+        }
+        public override async Task onCommand(SocketSlashCommand command)
         {
+            if (command.CommandName != "giverole") return;
+
             var options = command.Data.Options.ToList();
             if (((IUser)options[0].Value).Id == 324794944042565643 && command.User.Id != 324794944042565643) 
             { 

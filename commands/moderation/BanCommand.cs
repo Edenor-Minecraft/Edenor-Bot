@@ -1,9 +1,29 @@
-﻿namespace Discord_Bot.commands.moderation
+﻿using Discord_Bot.handlers;
+
+namespace Discord_Bot.commands.moderation
 {
     public class BanCommand : BaseCommandClass
     {
-        public static new async Task onCommand(SocketSlashCommand command)
+        public BanCommand() {
+            var ban = new SlashCommandBuilder();
+            locale.Add("ru", "бан");
+            ban.WithName("ban");
+            ban.WithNameLocalizations(locale);
+            ban.WithDescription("Банит участника сервера");
+            ban.WithDefaultMemberPermissions(GuildPermission.BanMembers);
+            ban.AddOption("user", ApplicationCommandOptionType.User, "Участник сервера, который будет забанен", true);
+            ban.AddOption("days", ApplicationCommandOptionType.Integer, "Количество дней для удаления сообщений от этого пользователя", false);
+            ban.AddOption("reason", ApplicationCommandOptionType.String, "Причина бана", false);
+            ban.AddOption("sendreason", ApplicationCommandOptionType.Boolean, "Отправить причину бана нарушителю?", false);
+            locale.Clear();
+
+            commandProperties = ban.Build();
+
+            CommandsHandler.OnCommand += onCommand;
+        }
+        public override async Task onCommand(SocketSlashCommand command)
         {
+            if (command.CommandName != "ban") return;
             IUser userToBan = command.Data.Options.ToList()[0].Value as IUser;
             int days = 0;
             string reason = $"{command.User.Username}";
@@ -28,16 +48,25 @@
             {
                 if (ModerationFunctions.banUser(userToBan, days, reason, showReason))
                 {
-                    await command.RespondAsync("Пользователь " + userToBan.Username + " успешно забанен!");
+                    await command.ModifyOriginalResponseAsync(x =>
+                    {
+                        x.Content = "Пользователь " + userToBan.Username + " успешно забанен!";
+                    });
                 }
                 else 
-                { 
-                    await command.RespondAsync("Не удалось забанить пользователя " + userToBan.Username); 
+                {
+                    await command.ModifyOriginalResponseAsync(x =>
+                    {
+                        x.Content = "Не удалось забанить пользователя " + userToBan.Username;
+                    });
                 }
             }
             else
             {
-                await command.RespondAsync("Вы не можете забанить данного пользователя!");
+                await command.ModifyOriginalResponseAsync(x =>
+                {
+                    x.Content = "Вы не можете забанить данного пользователя!";
+                });
             }
         }
     }

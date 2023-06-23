@@ -1,12 +1,32 @@
 ﻿using Discord;
+using Discord_Bot.handlers;
 
 namespace Discord_Bot.commands.moderation
 {
     public class TimeoutCommand : BaseCommandClass
     {
         public static TimeSpan defaultInterval = TimeSpan.FromHours(1);
-        public static new async Task onCommand(SocketSlashCommand command)
+
+        public TimeoutCommand() {
+            var timeout = new SlashCommandBuilder();
+            locale.Add("ru", "таймаут");
+            timeout.WithName("timeout");
+            timeout.WithNameLocalizations(locale);
+            timeout.WithDescription("Отправляет пользователя подумать о певедении");
+            timeout.WithDefaultMemberPermissions(GuildPermission.ModerateMembers);
+            timeout.AddOption("user", ApplicationCommandOptionType.User, "Участник сервера, который будет отправлен думать о своём поведении", true);
+            timeout.AddOption("time", ApplicationCommandOptionType.String, "Время тайм-аута плюс (s, m, h, d) в конце", false);
+            timeout.AddOption("reason", ApplicationCommandOptionType.String, "Причина выдачи тайм-аута", false);
+            timeout.AddOption("sendreason", ApplicationCommandOptionType.Boolean, "Отправить причину таймаута нарушителю?", false);
+            locale.Clear();
+
+            commandProperties = timeout.Build();
+
+            CommandsHandler.OnCommand += onCommand;
+        }
+        public override async Task onCommand(SocketSlashCommand command)
         {
+            if (command.CommandName != "timeout") return;
             IUser user = (IUser)command.Data.Options.ToList()[0].Value;
             string time = "1h";
             string reason = $"{command.User.Username}";
@@ -29,12 +49,18 @@ namespace Discord_Bot.commands.moderation
             TimeSpan interval = getTimeSpan(time);
             
             if (ModerationFunctions.timeOutUser(user, interval, reason, showReason)) 
-            { 
-                await command.RespondAsync("Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно отправлен подумать о своём поведении!"); 
+            {
+                await command.ModifyOriginalResponseAsync(x =>
+                {
+                    x.Content = "Пользователь " + ((IUser)command.Data.Options.First().Value).Username + " успешно отправлен подумать о своём поведении!";
+                });
             }
             else 
-            { 
-                await command.RespondAsync("Не удалось отправить пользователя " + ((IUser)command.Data.Options.First().Value).Username + " думать о своём поведении"); 
+            {
+                await command.ModifyOriginalResponseAsync(x =>
+                {
+                    x.Content = "Не удалось отправить пользователя " + ((IUser)command.Data.Options.First().Value).Username + " думать о своём поведении";
+                }); 
             }
         }
 

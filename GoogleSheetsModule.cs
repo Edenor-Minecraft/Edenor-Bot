@@ -9,7 +9,7 @@ namespace Discord_Bot
     {
         static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
         static readonly string ApplicationName = "Edenor Bot";
-        static readonly string SpreadsheetId = "1XYpSVHGBwe4PMlp1sWZBFW2ciIORqUjhxAAlqymicj4";
+        static readonly string SpreadsheetId = "1LJw2eAYBN_hx9z1klto758D_D-UM3vR8Rlx-YZtqN08";
         static readonly string sheet = "Ответы на форму (1)";
         static SheetsService service;
 
@@ -74,7 +74,7 @@ namespace Discord_Bot
                 {
                     foreach (var grid in execSheetData.Sheets.First().Data)
                     {
-                        if (grid.RowData.First().Values[2].UserEnteredValue.StringValue == "Твой Discord id (ник # 0000)")
+                        if (grid.RowData.First().Values[2].UserEnteredValue.StringValue == "Твой Discord (Nickname#0000 или @nickname)")
                         {
                             discordColumn = grid;
                         }

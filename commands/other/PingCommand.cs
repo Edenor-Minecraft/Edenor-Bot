@@ -2,7 +2,7 @@
 {
     public class PingCommand : BaseCommandClass
     {
-        public static new async Task onCommand(SocketSlashCommand command)
+        public override async Task onCommand(SocketSlashCommand command)
         {
             await command.RespondAsync("Понг", options: new RequestOptions()
             {

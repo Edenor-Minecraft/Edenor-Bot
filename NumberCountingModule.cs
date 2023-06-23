@@ -37,29 +37,12 @@
             }
         }
 
-        public static async Task onCommand(SocketSlashCommand command)
-        {
-            switch (command.CommandName)
-            {
-                case "setnumber":
-                    if (Convert.ToInt64(command.Data.Options.First().Value.ToString()) < 0) { command.RespondAsync("Начальное число не может быть меньше 0!"); break;}
-                    long val = 0;
-                    if (Convert.ToInt64(command.Data.Options.First().Value.ToString()) != 0) { val = Convert.ToInt64(command.Data.Options.First().Value.ToString()) - 1; }
-                    WriteSetting(val, 0);
-                    lastNumber = val;
-                    lastUser = 0;
-                    command.RespondAsync("Теперь отсчёт начнётся с " + command.Data.Options.First().Value.ToString() + "!");
-                    break;
-                default:
-                    break;
-            }
-        }
-
         public static Task onMessageDeleted(IMessage msg, IMessageChannel channel)
         {
             if (Convert.ToInt64(msg.Content) == lastNumber)
             {
                 ((SocketTextChannel)Program.instance.edenor.GetChannel(channel.Id)).SendMessageAsync($"Число {msg.Content}, отправленное {msg.Author.Username}, было удалено. Следующее число - {Convert.ToInt64(msg.Content) + 1}");
+                lastUser = (long)msg.Author.Id;
                 WriteSetting(lastNumber, (long)msg.Author.Id);
             }
             return Task.CompletedTask;        
@@ -122,7 +105,7 @@
                 guildUser.AddRoleAsync(994659152716628019);
             }
         }
-        private static void WriteSetting(long number, long user)
+        public static void WriteSetting(long number, long user)
         {
             File.WriteAllText(dir, number.ToString() + ":" + user.ToString());
         }

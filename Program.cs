@@ -19,6 +19,8 @@ using OpenAI_API.Models;
 using Discord_Bot.handlers;
 using System.Net.Http;
 using Discord.Webhook;
+using Newtonsoft.Json;
+using System.ComponentModel;
 
 namespace Discord_Bot
 {
@@ -29,7 +31,9 @@ namespace Discord_Bot
         public DiscordSocketClient client;
         public SocketGuild edenor;
         public OpenAIAPI openAIAPI;
+        public UserDatabase userDatabase;
         static Timer googleTimer;
+        static Timer databaseUpdater;
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
 
@@ -47,30 +51,40 @@ namespace Discord_Bot
 
         public Program()
         {
+            logInfo("Trying to start bot!");
+
             instance = this;
 
+            logInfo("Trying to find config!");
             string stream = File.ReadAllText(configDir);
-            config = JsonSerializer.Deserialize<BotConfig>(stream);
+            config = System.Text.Json.JsonSerializer.Deserialize<BotConfig>(stream);
+
+            config.enableRconFunctions = config.enableRconFunctions == null ? false : config.enableRconFunctions;
 
             if (config.loggerWebhookURL != null)
             {
                 loggerWebhook = new DiscordWebhookClient(config.loggerWebhookURL);
             }
 
+            logInfo("Setuping timers!");
             googleTimer = new Timer(GoogleSheetsHelper.timer, new AutoResetEvent(true), 1000, 1800000);
+            databaseUpdater = new Timer(UserDatabase.timer, new AutoResetEvent(true), 300000, 300000);
 
-            if (config.rconIP != null && config.rconPort != null && config.rconPassword != null)
+            if (config.enableRconFunctions)
             {
-                try
+                if (config.rconIP != null && config.rconPort != null && config.rconPassword != null)
                 {
-                    rcon = new MinecraftCommands(config.rconIP, Convert.ToUInt16(config.rconPort), config.rconPassword);
-                }
-                catch (Exception e)
-                {
-                    logError(e.Message + e.StackTrace);
+                    try
+                    {
+                        rcon = new MinecraftCommands(config.rconIP, Convert.ToUInt16(config.rconPort), config.rconPassword);
+                    }
+                    catch (Exception e)
+                    {
+                        logError(e.Message + e.StackTrace);
+                    }
                 }
             }
-            
+
             /*if (config.openAIAPIKey != null)
             {
                 openAIAPI = new OpenAIAPI(new APIAuthentication(config.openAIAPIKey));
@@ -79,43 +93,36 @@ namespace Discord_Bot
                 ChatGPTModule.ready = true;
                 ChatGPTModule.chat.AppendSystemMessage("Ты дискорд бот дискорд сервера по майнкрафт серверу под названием Эденор. Соответственно тебя тоже зовут Эденор. Ты должен помогать игрокам по вопросам игры или давать им совет обращаться к администрации, если ответа на этот вопрос нигде нет.");
             }*/
-            
+
+            logInfo("Starting bot!");
             var socketConfig = new DiscordSocketConfig
             {
                 GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers | GatewayIntents.MessageContent,
-                MessageCacheSize = 50
+                MessageCacheSize = 50,
+                AlwaysDownloadUsers = true
             };
 
             client = new DiscordSocketClient(socketConfig);
             client.MessageReceived += MessagesHandler;
             client.Log += Log;
             client.Ready += onReady;
-            client.SlashCommandExecuted += handlers.CommandsHandler.onCommand;
-            client.ButtonExecuted += handlers.ButtonsHandler.onButton;
+            client.SlashCommandExecuted += CommandsHandler.onCommand;
+            client.ButtonExecuted += ButtonsHandler.onButton;
             client.MessageDeleted += onMessageDeleted;
-            client.ModalSubmitted += handlers.ModalsHandler.onModal;
-            client.SelectMenuExecuted += handlers.SelectMenuHandler.onSelect;
-            client.UserBanned += handlers.BanHandler.onBan;
-            client.UserJoined += handlers.OnGuildJoin.onJoin;
-            //client.ThreadCreated += TicketHandler.onNewThread;
+            client.ModalSubmitted += ModalsHandler.onModal;
+            client.SelectMenuExecuted += SelectMenuHandler.onSelect;
+            client.UserBanned += BanHandler.onBan;
+            client.UserJoined += OnGuildJoin.onJoin;
+            client.ThreadCreated += TicketHandler.onNewThread;
+            client.Disconnected += onDisconnected;
 
+            logInfo("Setuping GoogleSheetsHelper");
             GoogleSheetsHelper.setupHelper();
-        }
-        private async Task MainAsync()
-        {
-            /*callbackAPI = new CallbackAPIHandler();
-            await callbackAPI.startHost();*/
 
-            var token = config.token;
+            logInfo("Trying to load user database!");
+            userDatabase = new UserDatabase(677860751695806515);
 
-            await client.LoginAsync(TokenType.Bot, token);
-            await client.StartAsync();
-            
-            await Task.Delay(Timeout.Infinite);
-            await GoogleSheetsHelper.reloadInfos();
-            await NumberCountingModule.loadAll();
-
-            while (enableCommands)
+            /*while (enableCommands)
             {
                 if (Console.ReadLine() != null)
                 {
@@ -127,22 +134,60 @@ namespace Discord_Bot
                             logInfo("Trying to kill bot process");
                             Process.GetCurrentProcess().Kill();
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             logError("Failed to kill bot process!\n" + ex.Message + ex.StackTrace);
                         }
                     }
+                    else if (cmd == "saveBase")
+                    {
+                        UserDatabase.saveData();
+                    }
                 }
+            }*/
+        }
+        private async Task MainAsync()
+        {
+            /*callbackAPI = new CallbackAPIHandler();
+            await callbackAPI.startHost();*/
+
+            if (config.token == null)
+            {
+                logError("Invalid token!");
+                Process.GetCurrentProcess().Kill();
             }
+
+            logInfo("Finishing bot starting!");
+            var token = config.token;
+
+            await client.LoginAsync(TokenType.Bot, token);
+            await client.StartAsync();
+            
+            await Task.Delay(Timeout.Infinite);
+
+            await GoogleSheetsHelper.reloadInfos();
+            await NumberCountingModule.loadAll();
         }
         private async Task onReady()
         {
             ready = true;
             logTrace("Ready to work, bitches!");
-            var edenGame = new Game("Эденор", ActivityType.Playing, ActivityProperties.Join, "https://edenor.ru/");       
+
+            var edenGame = new Game("Эденор", ActivityType.Playing, ActivityProperties.Join, "https://edenor.ru/");
             await client.SetActivityAsync(edenGame);
+
             edenor = client.CurrentUser.MutualGuilds.First(); //Easy access to edenor guild
+
+            logInfo("Setup bot commands!");
             await handlers.CommandsHandler.setupCommands();
+
+            logInfo("Trying to init database!");
+            await userDatabase.initDatabase();
+        }
+        private async Task onDisconnected(Exception arg)
+        {
+            logError(arg.Message + arg.StackTrace);
+            await userDatabase.saveData();
         }
 
         public void start(object stateInfo)
@@ -279,6 +324,7 @@ namespace Discord_Bot
     class BotConfig
     {
         public string token { set; get; }
+        public bool enableRconFunctions { set; get; }
         public string rconIP { set; get; }
         public string rconPort { set; get;}
         public string rconPassword { set; get; }

@@ -1,10 +1,28 @@
-﻿namespace Discord_Bot.commands.admin
+﻿using Discord_Bot.handlers;
+
+namespace Discord_Bot.commands.admin
 {
     public class RefreshGoogleSheetDataCommand : BaseCommandClass
     {
-        public static async new Task onCommand(SocketSlashCommand command)
+        public RefreshGoogleSheetDataCommand() {
+            var refreshGoogleSheetData = new SlashCommandBuilder();
+            locale.Add("ru", "перезагрузитьданныетаблицы");
+            refreshGoogleSheetData.WithName("refreshgooglesheetdata");
+            refreshGoogleSheetData.WithNameLocalizations(locale);
+            refreshGoogleSheetData.WithDescription("Принудительно перезагружает данные таблицы вайт листа");
+            refreshGoogleSheetData.WithDefaultMemberPermissions(GuildPermission.Administrator);
+            locale.Clear();
+
+            commandProperties = refreshGoogleSheetData.Build();
+
+            CommandsHandler.OnCommand += onCommand;
+        }
+        public override async Task onCommand(SocketSlashCommand command)
         {
-            await command.RespondAsync("Перезагружаем данные таблицы");
+            if (command.CommandName != "refreshgooglesheetdata") return;
+            await command.ModifyOriginalResponseAsync(x => {
+                x.Content = "Перезагружаем данные таблицы";
+            });
             try
             {   
                 GoogleSheetsHelper.reloadInfos();
