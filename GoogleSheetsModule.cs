@@ -93,7 +93,7 @@ namespace Discord_Bot
                         if (values.IndexOf(row) == 0) continue;
                         string nick = "";
                         if (row.Count > 3)
-                            nick = row[3].ToString();
+                            nick = row[3].ToString().Trim();
                         if (gridRow > values.Count - 1) { break; }
                         bool accepted = false;
                         try
@@ -157,7 +157,12 @@ namespace Discord_Bot
         {
             try
             {
-                return discordAccountsList[minecraftNick];
+                if (discordAccountsList.ContainsKey (minecraftNick))
+                {
+                    bool def = false;
+                    return discordAccountsList.TryGetValue(minecraftNick.Trim(), out def);
+                }
+                return false;
             }
             catch (Exception e)
             {
