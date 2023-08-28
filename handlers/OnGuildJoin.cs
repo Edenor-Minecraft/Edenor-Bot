@@ -13,6 +13,17 @@
                     return Task.CompletedTask;
                 }
             }
+
+            var data = Program.instance.userDatabase.GetUserData(user.Id).Result;
+
+            if (data != null)
+            {
+                foreach(var role in data.UserRoles)
+                {
+                    user.AddRoleAsync(role);
+                }
+            }
+
             return Task.CompletedTask;
         }
     }

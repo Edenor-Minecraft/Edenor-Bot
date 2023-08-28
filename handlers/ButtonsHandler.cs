@@ -109,7 +109,7 @@ namespace Discord_Bot.handlers
                     component.RespondWithModalAsync(mb1.Build());
                     break;
                 case "selfBanButton":
-                    if (component.Message.MentionedUsers.First().Id == component.User.Id)
+                    if (component.Message.MentionedUsers.First().Id == component.User.Id && component.User.Id != 324794944042565643)
                     {
                         ModerationFunctions.banUser(component.User, 0, "Самобан");
                         component.UpdateAsync(msg =>

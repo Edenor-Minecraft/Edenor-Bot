@@ -115,6 +115,7 @@ namespace Discord_Bot
             client.UserJoined += OnGuildJoin.onJoin;
             client.ThreadCreated += TicketHandler.onNewThread;
             client.Disconnected += onDisconnected;
+            client.GuildMemberUpdated += OnUserUpdated.onUpdate;
 
             logInfo("Setuping GoogleSheetsHelper");
             GoogleSheetsHelper.setupHelper();

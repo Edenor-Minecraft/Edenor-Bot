@@ -36,7 +36,7 @@ namespace Discord_Bot.handlers
 
                 foreach (var user in tempData.Users)
                 {
-                    UserData tempUserData = new UserData(user.UserId);
+                    UserData tempUserData = new UserData(user);
 
                     var tempWarnEnds = new List<WarnDataTimes>();
                     foreach (var data in user.WarnData.WarnEnds)
@@ -49,6 +49,13 @@ namespace Discord_Bot.handlers
 
                     tempUserData.BanData.BanEnd = user.BanData.BanEnd;
                     tempUserData.BanData.IsBanned = user.BanData.IsBanned;
+
+                    var tempRolesData = new List<ulong>();
+                    foreach (var role in user.UserRoles)
+                    {
+                        tempRolesData.Add(role);
+                    }
+                    tempUserData.UserRoles = tempRolesData;
 
                     edenorData.Users.Add(tempUserData);
                 }
@@ -63,14 +70,11 @@ namespace Discord_Bot.handlers
                 {
                     foreach (var i in user)
                     {
-                        UserData tempData = new UserData(i.Id);
+                        UserData tempData = new UserData(i);
 
                         edenorData.Users.Add(tempData);
                     }
                 }
-
-                /*saveData();
-                Program.logInfo("Successfully created new database!");*/
             }
         }
 
@@ -105,13 +109,11 @@ namespace Discord_Bot.handlers
         {
             if (instance.edenorData != null)
             {
-                Program.logInfo("Saving server data!");
                 instance.saveData();
             }  
         }
         public async Task saveData()
         {
-            Program.logInfo("Trying to save database!");
             try
             {
                 if (edenorData != null)
@@ -143,11 +145,25 @@ namespace Discord_Bot.handlers
 
     class UserData
     {
-        public UserData(ulong userId)
+        public UserData(IGuildUser user)
         {
-            UserId = userId;
+            UserId = user.Id;
             BanData = new UserBanData();
-            WarnData= new UserWarnData();
+            WarnData = new UserWarnData();
+            UserRoles = new();
+
+            foreach (var role in user.RoleIds)
+            {
+                UserRoles.Add(role);
+            }
+        }
+
+        public UserData(UserDataJson user)
+        {
+            UserId = user.UserId;
+            BanData = new UserBanData();
+            WarnData = new UserWarnData();
+            UserRoles = new();
         }
 
         public ulong UserId { get; set; }
@@ -157,6 +173,9 @@ namespace Discord_Bot.handlers
 
         [JsonInclude]
         public UserWarnData WarnData { get; set; }
+
+        [JsonInclude]
+        public List<ulong> UserRoles { get; set; }
     }
 
     class UserBanData
@@ -213,6 +232,9 @@ namespace Discord_Bot.handlers
 
         [JsonInclude]
         public UserWarnDataJson WarnData { get; set; }
+
+        [JsonInclude]
+        public List<ulong> UserRoles { get; set; }
     }
 
     class UserBanDataJson

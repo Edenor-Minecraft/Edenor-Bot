@@ -8,3 +8,4 @@ obj/*
 /commands/moderation/Текстовый документ.txt
 /commands/other/Текстовый документ.txt
 /vk_config.json
+.vs/*
