@@ -22,10 +22,10 @@ namespace Discord_Bot.commands.admin
             {
                 if (Program.instance.rcon != null)
                 {
-                    Program.instance.rcon.SendCommand(command.Data.Options.ToList()[0].Value.ToString());
+                    string responce = Program.instance.rcon.SendCommand(command.Data.Options.ToList()[0].Value.ToString());
                     await command.ModifyOriginalResponseAsync(x =>
                     {
-                        x.Content = "Успешно использовали команду!";
+                        x.Content = responce;
                     });
                 }
                 else
