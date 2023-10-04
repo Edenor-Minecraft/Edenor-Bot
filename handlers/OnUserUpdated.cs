@@ -4,6 +4,9 @@
     {
         internal static Task onUpdate(Cacheable<SocketGuildUser, ulong> cacheable, SocketGuildUser user)
         {
+            if (!cacheable.HasValue)
+                return Task.CompletedTask;
+
             if (!cacheable.Value.Roles.Equals(user.Roles)) {
                 var roleChanges = cacheable.Value.Roles.Except(user.Roles);
                 var data = Program.instance.userDatabase.GetUserData(user.Id).Result;

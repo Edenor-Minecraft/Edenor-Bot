@@ -1,4 +1,4 @@
-﻿namespace Discord_Bot
+﻿namespace Discord_Bot.handlers
 {
     class NumberCountingModule
     {
@@ -6,7 +6,7 @@
         public static long lastNumber = 0;
         public static long lastUser = 0;
         static Emoji numberReact = new Emoji("\u2705");
-        static string dir = (Environment.CurrentDirectory + "/savedNumber.txt");
+        static string dir = Environment.CurrentDirectory + "/savedNumber.txt";
 
         public static async Task loadAll()
         {
@@ -45,7 +45,7 @@
                 lastUser = (long)msg.Author.Id;
                 WriteSetting(lastNumber, (long)msg.Author.Id);
             }
-            return Task.CompletedTask;        
+            return Task.CompletedTask;
         }
 
         public static Task doWork(SocketMessage msg)
@@ -54,7 +54,7 @@
             {
                 try
                 {
-                    if (Convert.ToInt64(msg.Content) == (lastNumber + 1) && lastUser != Convert.ToInt64(msg.Author.Id.ToString()))
+                    if (Convert.ToInt64(msg.Content) == lastNumber + 1 && lastUser != Convert.ToInt64(msg.Author.Id.ToString()))
                     {
                         lastNumber += 1;
                         lastUser = Convert.ToInt64(msg.Author.Id.ToString());

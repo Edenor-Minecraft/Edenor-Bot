@@ -180,7 +180,7 @@ namespace Discord_Bot
             edenor = client.CurrentUser.MutualGuilds.First(); //Easy access to edenor guild
 
             logInfo("Setup bot commands!");
-            await handlers.CommandsHandler.setupCommands();
+            await CommandsHandler.setupCommands();
 
             logInfo("Trying to init database!");
             await userDatabase.initDatabase();

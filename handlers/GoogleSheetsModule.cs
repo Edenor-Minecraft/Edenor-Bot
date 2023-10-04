@@ -3,7 +3,7 @@ using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Services;
 
-namespace Discord_Bot
+namespace Discord_Bot.handlers
 {
     class GoogleSheetsHelper
     {
@@ -61,8 +61,8 @@ namespace Discord_Bot
         static IDictionary<string, bool> discordAccountsList = new Dictionary<string, bool>();
         private static void ReadEntries()
         {
-           try
-           {
+            try
+            {
                 discordAccountsList.Clear();
                 var range = $"{sheet}!A:F";
                 SpreadsheetsResource.GetRequest sheetData = service.Spreadsheets.Get(SpreadsheetId);
@@ -114,35 +114,37 @@ namespace Discord_Bot
                                 }
                             }
                         }
-                        catch(Exception ex) {
+                        catch (Exception ex)
+                        {
                             Program.logError(ex.Message + ex.StackTrace);
                         }
-                                                                
-                        if (discordAccountsList.ContainsKey(nick)) {
+
+                        if (discordAccountsList.ContainsKey(nick))
+                        {
                             gridRow += 1;
                         }
                         else
                         {
                             discordAccountsList.Add(nick, accepted);
                             gridRow += 1;
-                        }   
+                        }
                     }
                 }
                 else
                 {
                     Program.logError("No data found.");
                 }
-           }
-           catch(Exception e)
-           {
-               Program.logError(e.Message + e.StackTrace);
-           }
+            }
+            catch (Exception e)
+            {
+                Program.logError(e.Message + e.StackTrace);
+            }
         }
 
-        private static Boolean checkColor(float red, float blue, float green)
+        private static bool checkColor(float red, float blue, float green)
         {
-            if (Math.Round(red, 1, MidpointRounding.AwayFromZero) == 0.4 
-                && Math.Round(blue, 1, MidpointRounding.AwayFromZero) == 0.3 
+            if (Math.Round(red, 1, MidpointRounding.AwayFromZero) == 0.4
+                && Math.Round(blue, 1, MidpointRounding.AwayFromZero) == 0.3
                 && Math.Round(green, 1, MidpointRounding.AwayFromZero) == 0.7)
             {
                 return true;
@@ -153,11 +155,11 @@ namespace Discord_Bot
             }
         }
 
-        public static Boolean checkAccepted(string minecraftNick)
+        public static bool checkAccepted(string minecraftNick)
         {
             try
             {
-                if (discordAccountsList.ContainsKey (minecraftNick))
+                if (discordAccountsList.ContainsKey(minecraftNick))
                 {
                     bool def = false;
                     return discordAccountsList.TryGetValue(minecraftNick.Trim(), out def);

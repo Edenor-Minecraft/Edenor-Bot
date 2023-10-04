@@ -14,7 +14,7 @@
                 }
             }
 
-            var data = Program.instance.userDatabase.GetUserData(user.Id).Result;
+            /*var data = Program.instance.userDatabase.GetUserData(user.Id).Result;
 
             if (data != null)
             {
@@ -22,7 +22,7 @@
                 {
                     user.AddRoleAsync(role);
                 }
-            }
+            }*/
 
             return Task.CompletedTask;
         }
