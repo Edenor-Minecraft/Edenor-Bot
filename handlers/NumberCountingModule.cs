@@ -10,28 +10,27 @@
 
         public static async Task loadAll()
         {
-            if (lastNumber == 0)
+            if (lastNumber == 0 && lastUser == 0)
             {
                 try
                 {
-                    lastNumber = getLastNumber();
+                    if (File.Exists(dir))
+                    {
+                        StreamReader sr = new StreamReader(dir);
+                        string text = sr.ReadToEnd();
+                        sr.Close();
+                        lastNumber = Convert.ToInt64(text.Split(":")[0]);
+                        lastUser = Convert.ToInt64(text.Split(":")[1]);
+                    }
+                    else
+                    {
+                        return;
+                    }
                 }
                 catch (Exception e)
                 {
-                    Program.logError("Error while setting up last number " + e.Message);
+                    await Program.logError("Error while setting up last number and user" + e.Message);
                     lastNumber = 0;
-                }
-            }
-
-            if (lastUser == 0)
-            {
-                try
-                {
-                    lastUser = getLastUser();
-                }
-                catch (Exception e)
-                {
-                    Program.logError("Error while setting up last user " + e.Message);
                     lastUser = 0;
                 }
             }
@@ -39,12 +38,16 @@
 
         public static Task onMessageDeleted(IMessage msg, IMessageChannel channel)
         {
-            if (Convert.ToInt64(msg.Content) == lastNumber)
-            {
-                ((SocketTextChannel)Program.instance.edenor.GetChannel(channel.Id)).SendMessageAsync($"Число {msg.Content}, отправленное {msg.Author.Username}, было удалено. Следующее число - {Convert.ToInt64(msg.Content) + 1}");
-                lastUser = (long)msg.Author.Id;
-                WriteSetting(lastNumber, (long)msg.Author.Id);
+            long msgC = checkAndConvertNumber(msg.Content);
+            if (msgC != -1) {
+                if (msgC == lastNumber)
+                {
+                    ((SocketTextChannel)Program.instance.edenor.GetChannel(channel.Id)).SendMessageAsync($"Число {msg.Content}, отправленное {msg.Author.Username}, было удалено. Следующее число - {Convert.ToInt64(msg.Content) + 1}");
+                    lastUser = (long)msg.Author.Id;
+                    WriteSetting(lastNumber, (long)msg.Author.Id);
+                }
             }
+            
             return Task.CompletedTask;
         }
 
@@ -52,38 +55,40 @@
         {
             if (!msg.Content.StartsWith("Число") && msg.Author.Id != 710401785663193158)
             {
-                try
+                long msgC = checkAndConvertNumber(msg.Content);
+                long authorId = Convert.ToInt64(msg.Author.Id.ToString());
+                if (msgC != -1)
                 {
-                    if (Convert.ToInt64(msg.Content) == lastNumber + 1 && lastUser != Convert.ToInt64(msg.Author.Id.ToString()))
+                    if (msgC == lastNumber + 1 && lastUser != authorId)
                     {
                         lastNumber += 1;
-                        lastUser = Convert.ToInt64(msg.Author.Id.ToString());
+                        lastUser = authorId;
                         WriteSetting(lastNumber, lastUser);
                         msg.AddReactionAsync(numberReact);
-                        giveRole(Convert.ToInt64(msg.Content), msg.Author);
+                        giveRole(lastNumber, msg.Author);
                         return Task.CompletedTask;
                     }
                     else
                     {
-                        if (msg.Author.Id != 710401785663193158)
-                        {
-                            msg.DeleteAsync();
-                        }
+                        removeMsg(msg);
                         return Task.CompletedTask;
                     }
                 }
-                catch (Exception e)
+                else
                 {
-                    if (e.Message.Contains("Input string was not in a correct format.")) return Task.CompletedTask;
-                    if (msg.Author.Id != 710401785663193158)
-                    {
-                        msg.DeleteAsync();
-                    }
-                    Program.logError(e.Message);
+                    removeMsg(msg);
                     return Task.CompletedTask;
                 }
             }
             else { return Task.CompletedTask; }
+        }
+
+        private static void removeMsg(SocketMessage msg)
+        {
+            if (msg.Author.Id != 710401785663193158)
+            {
+                msg.DeleteAsync();
+            }
         }
 
         private static void giveRole(long number, SocketUser user)
@@ -110,38 +115,14 @@
             File.WriteAllText(dir, number.ToString() + ":" + user.ToString());
         }
 
-        public static long getLastNumber()
+        private static long checkAndConvertNumber(string str)
         {
-            if (File.Exists(dir))
+            if (str.All(char.IsDigit))
             {
-                long retVal = 0;
-                StreamReader sr = new StreamReader(dir);
-                string text = sr.ReadToEnd();
-                sr.Close();
-                retVal = Convert.ToInt64(text.Split(":")[0]);
-                return retVal;
+                return Convert.ToInt64(str);
             }
-            else
-            {
-                return 0;
-            }
-        }
 
-        public static long getLastUser()
-        {
-            if (File.Exists(dir))
-            {
-                long retVal = 0;
-                StreamReader sr = new StreamReader(dir);
-                string text = sr.ReadToEnd();
-                sr.Close();
-                retVal = Convert.ToInt64(text.Split(":")[1]);
-                return retVal;
-            }
-            else
-            {
-                return 0;
-            }
+            return -1;
         }
     }
 }

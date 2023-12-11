@@ -9,7 +9,7 @@ namespace Discord_Bot.handlers
     {
         static readonly string[] Scopes = { SheetsService.Scope.Spreadsheets };
         static readonly string ApplicationName = "Edenor Bot";
-        static readonly string SpreadsheetId = "1LJw2eAYBN_hx9z1klto758D_D-UM3vR8Rlx-YZtqN08";
+        static readonly string SpreadsheetId = "1iD0heGU3wCvTOVrgc3U5kU4d7u2Hu3cSjaVzZzzaLC4";
         static readonly string sheet = "Ответы на форму (1)";
         static SheetsService service;
 
