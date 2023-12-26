@@ -92,8 +92,8 @@ namespace Discord_Bot.handlers
                     {
                         if (values.IndexOf(row) == 0) continue;
                         string nick = "";
-                        if (row.Count > 3)
-                            nick = row[3].ToString().Trim();
+                        if (row.Count > 4)
+                            nick = row[4].ToString().Trim();
                         if (gridRow > values.Count - 1) { break; }
                         bool accepted = false;
                         try
@@ -118,7 +118,6 @@ namespace Discord_Bot.handlers
                         {
                             Program.logError(ex.Message + ex.StackTrace);
                         }
-
                         if (discordAccountsList.ContainsKey(nick))
                         {
                             gridRow += 1;
