@@ -2,6 +2,7 @@
 using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Services;
+using System.Linq;
 
 namespace Discord_Bot.handlers
 {
@@ -36,7 +37,7 @@ namespace Discord_Bot.handlers
             }
             catch (Exception e)
             {
-                Program.logError(e.Message);
+                _ = Program.logError(e.Message);
             }
         }
 
@@ -44,18 +45,18 @@ namespace Discord_Bot.handlers
         {
             if (ready)
             {
-                Program.logInfo("Refreshing discord accounts infos");
+                _ = Program.logInfo("Refreshing discord accounts infos");
                 ReadEntries();
             }
             else
             {
-                Program.logWarn("GoogleSheets module not initialized!");
+                _ = Program.logWarn("GoogleSheets module not initialized!");
             }
         }
 
         public static void timer(object stateInfo)
         {
-            reloadInfos();
+            _ = reloadInfos();
         }
 
         static IDictionary<string, bool> discordAccountsList = new Dictionary<string, bool>();
@@ -69,82 +70,48 @@ namespace Discord_Bot.handlers
                 sheetData.IncludeGridData = true;
 
                 var execSheetData = sheetData.Execute();
-                GridData discordColumn = null;
                 if (execSheetData != null)
                 {
                     foreach (var grid in execSheetData.Sheets.First().Data)
                     {
-                        if (grid.RowData.First().Values[2].UserEnteredValue.StringValue == "Твой Discord (Nickname#0000 или @nickname)")
-                        {
-                            discordColumn = grid;
+                        foreach (var row in grid.RowData)
+                        {   
+                            if (!discordAccountsList.ContainsKey(normalizeNick(row.Values[3].UserEnteredValue.StringValue)))
+                                discordAccountsList.Add(normalizeNick(row.Values[3].UserEnteredValue.StringValue),
+                                    row.Values[3].UserEnteredFormat.BackgroundColorStyle != null 
+                                    && checkColor(row.Values[3].UserEnteredFormat.BackgroundColorStyle.RgbColor));
                         }
                     }
-                }
-
-                SpreadsheetsResource.ValuesResource.GetRequest request = service.Spreadsheets.Values.Get(SpreadsheetId, range);
-
-                var response = request.Execute();
-                IList<IList<object>> values = response.Values;
-                var gridRow = 1;
-                if (values != null && values.Count > 0)
-                {
-                    foreach (var row in values)
-                    {
-                        if (values.IndexOf(row) == 0) continue;
-                        string nick = "";
-                        if (row.Count > 4)
-                            nick = row[4].ToString().Trim();
-                        if (gridRow > values.Count - 1) { break; }
-                        bool accepted = false;
-                        try
-                        {
-                            if (discordColumn.RowData.ElementAtOrDefault(gridRow) != null) //Giga null checking
-                            {
-                                if (discordColumn.RowData.ElementAtOrDefault(gridRow).Values != null && discordColumn.RowData.ElementAtOrDefault(gridRow).Values.Count > 2)
-                                {
-                                    if (discordColumn.RowData.ElementAtOrDefault(gridRow).Values[2].UserEnteredFormat != null)
-                                    {
-                                        var colorStyle = discordColumn.RowData.ElementAtOrDefault(gridRow).Values[2].UserEnteredFormat.BackgroundColorStyle;
-                                        float red = colorStyle.RgbColor.Red == null ? 1 : colorStyle.RgbColor.Red.Value;
-                                        float blue = colorStyle.RgbColor.Blue == null ? 1 : colorStyle.RgbColor.Blue.Value;
-                                        float green = colorStyle.RgbColor.Green == null ? 1 : colorStyle.RgbColor.Green.Value;
-
-                                        accepted = checkColor(red, blue, green);
-                                    }
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Program.logError(ex.Message + ex.StackTrace);
-                        }
-                        if (discordAccountsList.ContainsKey(nick))
-                        {
-                            gridRow += 1;
-                        }
-                        else
-                        {
-                            discordAccountsList.Add(nick, accepted);
-                            gridRow += 1;
-                        }
-                    }
-                }
-                else
-                {
-                    Program.logError("No data found.");
                 }
             }
             catch (Exception e)
             {
-                Program.logError(e.Message + e.StackTrace);
+                _ = Program.logError(e.Message + e.StackTrace);
             }
         }
 
-        private static bool checkColor(float red, float blue, float green)
+        private static string normalizeNick(string rawNick)
         {
-            if (Math.Round(red, 1, MidpointRounding.AwayFromZero) == 0.4
-                && Math.Round(blue, 1, MidpointRounding.AwayFromZero) == 0.3
-                && Math.Round(green, 1, MidpointRounding.AwayFromZero) == 0.7)
+            string nick = rawNick;
+
+            if (rawNick.ElementAt(0) == '@')
+            {
+                nick = rawNick.Substring(1, rawNick.Length - 1);
+            }
+
+            if (nick.Split(' ').Length > 1)
+            {
+                nick = nick.Split(" ")[0];
+            }
+
+            return nick;
+        }
+
+        private static bool checkColor(Google.Apis.Sheets.v4.Data.Color color)
+        {
+            if (Math.Round(color.Red.HasValue ? color.Red.Value : 1, 1, MidpointRounding.AwayFromZero) == 0.4
+                && Math.Round(color.Blue.HasValue ? color.Blue.Value : 1, 1, MidpointRounding.AwayFromZero) == 0.3
+                && Math.Round(color.Green.HasValue ? color.Green.Value : 1, 1, MidpointRounding.AwayFromZero) == 0.7)
             {
                 return true;
             }
@@ -154,20 +121,20 @@ namespace Discord_Bot.handlers
             }
         }
 
-        public static bool checkAccepted(string minecraftNick)
+        public static bool checkAccepted(string discordNick)
         {
             try
             {
-                if (discordAccountsList.ContainsKey(minecraftNick))
+                if (discordAccountsList.ContainsKey(discordNick))
                 {
                     bool def = false;
-                    return discordAccountsList.TryGetValue(minecraftNick.Trim(), out def);
+                    return discordAccountsList.TryGetValue(discordNick.Trim(), out def);
                 }
                 return false;
             }
             catch (Exception e)
             {
-                Program.logError(e.Message + e.StackTrace);
+                _ = Program.logError(e.Message + e.StackTrace);
                 return false;
             }
         }

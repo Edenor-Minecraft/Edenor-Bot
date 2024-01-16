@@ -39,8 +39,6 @@ namespace Discord_Bot
 
         static string configDir = (Environment.CurrentDirectory + "/config.json");
 
-        private bool ready = false;
-
         private BotConfig config = null;
 
         public MinecraftCommands rcon;
@@ -51,9 +49,9 @@ namespace Discord_Bot
 
         public Program()
         {
-            logInfo("Trying to start bot!");
-
             instance = this;
+
+            logInfo("Trying to start bot!");
 
             logInfo("Trying to find config!");
             string stream = File.ReadAllText(configDir);
@@ -117,8 +115,6 @@ namespace Discord_Bot
             client.Disconnected += onDisconnected;
             client.GuildMemberUpdated += OnUserUpdated.onUpdate;
 
-            logInfo("Setuping GoogleSheetsHelper");
-            GoogleSheetsHelper.setupHelper();
 
             logInfo("Trying to load user database!");
             userDatabase = new UserDatabase(677860751695806515);
@@ -163,15 +159,18 @@ namespace Discord_Bot
 
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
-            
-            await Task.Delay(Timeout.Infinite);
 
-            await GoogleSheetsHelper.reloadInfos();
+
+            logInfo("Setuping GoogleSheetsHelper");
+            GoogleSheetsHelper.setupHelper();
+            GoogleSheetsHelper.reloadInfos();
+
             await NumberCountingModule.loadAll();
+
+            await Task.Delay(Timeout.Infinite);
         }
         private async Task onReady()
         {
-            ready = true;
             logTrace("Ready to work, bitches!");
 
             var edenGame = new Game("Эденор", ActivityType.Playing, ActivityProperties.Join, "https://edenor.ru/");
