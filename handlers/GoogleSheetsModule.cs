@@ -64,7 +64,6 @@ namespace Discord_Bot.handlers
         {
             try
             {
-                discordAccountsList.Clear();
                 var range = $"{sheet}!A:F";
                 SpreadsheetsResource.GetRequest sheetData = service.Spreadsheets.Get(SpreadsheetId);
                 sheetData.IncludeGridData = true;
@@ -75,11 +74,18 @@ namespace Discord_Bot.handlers
                     foreach (var grid in execSheetData.Sheets.First().Data)
                     {
                         foreach (var row in grid.RowData)
-                        {   
-                            if (!discordAccountsList.ContainsKey(normalizeNick(row.Values[3].UserEnteredValue.StringValue)))
-                                discordAccountsList.Add(normalizeNick(row.Values[3].UserEnteredValue.StringValue),
-                                    row.Values[3].UserEnteredFormat.BackgroundColorStyle != null 
-                                    && checkColor(row.Values[3].UserEnteredFormat.BackgroundColorStyle.RgbColor));
+                        {
+                            var nick = normalizeNick(row.Values[3].UserEnteredValue.StringValue);
+                            if (!discordAccountsList.ContainsKey(nick))
+                            {
+                                if (row.Values[3].UserEnteredFormat.BackgroundColorStyle == null)
+                                {
+                                    Program.logError("Null color style for " + nick);
+                                    discordAccountsList.Add(nick, false);
+                                    continue;
+                                }
+                                discordAccountsList.Add(nick, checkColor(row.Values[3].UserEnteredFormat.BackgroundColorStyle.RgbColor));
+                            }   
                         }
                     }
                 }
@@ -93,6 +99,12 @@ namespace Discord_Bot.handlers
         private static string normalizeNick(string rawNick)
         {
             string nick = rawNick;
+
+            if (rawNick == null)
+            {
+                nick = string.Empty; //Что тут блять произошло?
+                return nick;
+            }               
 
             if (rawNick.ElementAt(0) == '@')
             {

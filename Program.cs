@@ -9,18 +9,9 @@ global using System.IO;
 global using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Net;
-using Discord.Net;
-using Discord.Rest;
 using MinecraftConnection;
-using MinecraftConnection.RCON;
-using OpenAI_API;
-using OpenAI_API.Models;
 using Discord_Bot.handlers;
-using System.Net.Http;
 using Discord.Webhook;
-using Newtonsoft.Json;
-using System.ComponentModel;
 
 namespace Discord_Bot
 {
@@ -30,7 +21,6 @@ namespace Discord_Bot
         private DiscordWebhookClient loggerWebhook;
         public DiscordSocketClient client;
         public SocketGuild edenor;
-        public OpenAIAPI openAIAPI;
         public UserDatabase userDatabase;
         static Timer googleTimer;
         static Timer databaseUpdater;
@@ -43,28 +33,20 @@ namespace Discord_Bot
 
         public MinecraftCommands rcon;
 
-        static bool enableCommands = true;
-
-        //CallbackAPIHandler callbackAPI;
-
         public Program()
         {
             instance = this;
 
-            logInfo("Trying to start bot!");
-
-            logInfo("Trying to find config!");
             string stream = File.ReadAllText(configDir);
             config = System.Text.Json.JsonSerializer.Deserialize<BotConfig>(stream);
 
-            config.enableRconFunctions = config.enableRconFunctions == null ? false : config.enableRconFunctions;
+            config.enableRconFunctions = config.enableRconFunctions != null && config.enableRconFunctions;
 
             if (config.loggerWebhookURL != null)
             {
                 loggerWebhook = new DiscordWebhookClient(config.loggerWebhookURL);
             }
 
-            logInfo("Setuping timers!");
             googleTimer = new Timer(GoogleSheetsHelper.timer, new AutoResetEvent(true), 1000, 1800000);
             databaseUpdater = new Timer(UserDatabase.timer, new AutoResetEvent(true), 300000, 300000);
 
@@ -83,16 +65,6 @@ namespace Discord_Bot
                 }
             }
 
-            /*if (config.openAIAPIKey != null)
-            {
-                openAIAPI = new OpenAIAPI(new APIAuthentication(config.openAIAPIKey));
-                openAIAPI.Chat.DefaultChatRequestArgs = new OpenAI_API.Chat.ChatRequest() { Model = Model.ChatGPTTurbo, MaxTokens = 5};
-                ChatGPTModule.chat = openAIAPI.Chat.CreateConversation();
-                ChatGPTModule.ready = true;
-                ChatGPTModule.chat.AppendSystemMessage("Ты дискорд бот дискорд сервера по майнкрафт серверу под названием Эденор. Соответственно тебя тоже зовут Эденор. Ты должен помогать игрокам по вопросам игры или давать им совет обращаться к администрации, если ответа на этот вопрос нигде нет.");
-            }*/
-
-            logInfo("Starting bot!");
             var socketConfig = new DiscordSocketConfig
             {
                 GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.GuildMembers | GatewayIntents.MessageContent,
@@ -115,55 +87,23 @@ namespace Discord_Bot
             client.Disconnected += onDisconnected;
             client.GuildMemberUpdated += OnUserUpdated.onUpdate;
 
-
-            logInfo("Trying to load user database!");
             userDatabase = new UserDatabase(677860751695806515);
-
-            /*while (enableCommands)
-            {
-                if (Console.ReadLine() != null)
-                {
-                    string cmd = Console.ReadLine();
-                    if (cmd == "exit")
-                    {
-                        try
-                        {
-                            logInfo("Trying to kill bot process");
-                            Process.GetCurrentProcess().Kill();
-                        }
-                        catch (Exception ex)
-                        {
-                            logError("Failed to kill bot process!\n" + ex.Message + ex.StackTrace);
-                        }
-                    }
-                    else if (cmd == "saveBase")
-                    {
-                        UserDatabase.saveData();
-                    }
-                }
-            }*/
         }
         private async Task MainAsync()
         {
-            /*callbackAPI = new CallbackAPIHandler();
-            await callbackAPI.startHost();*/
-
             if (config.token == null)
             {
-                logError("Invalid token!");
+                await logError("Invalid token!");
                 Process.GetCurrentProcess().Kill();
             }
 
-            logInfo("Finishing bot starting!");
             var token = config.token;
 
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
 
-
-            logInfo("Setuping GoogleSheetsHelper");
             GoogleSheetsHelper.setupHelper();
-            GoogleSheetsHelper.reloadInfos();
+            await GoogleSheetsHelper.reloadInfos();
 
             await NumberCountingModule.loadAll();
 
@@ -171,28 +111,20 @@ namespace Discord_Bot
         }
         private async Task onReady()
         {
-            logTrace("Ready to work, bitches!");
 
             var edenGame = new Game("Эденор", ActivityType.Playing, ActivityProperties.Join, "https://edenor.ru/");
             await client.SetActivityAsync(edenGame);
 
             edenor = client.CurrentUser.MutualGuilds.First(); //Easy access to edenor guild
 
-            logInfo("Setup bot commands!");
             await CommandsHandler.setupCommands();
 
-            logInfo("Trying to init database!");
             await userDatabase.initDatabase();
         }
         private async Task onDisconnected(Exception arg)
         {
-            logError(arg.Message + arg.StackTrace);
+            await logError(arg.Message + arg.StackTrace);
             await userDatabase.saveData();
-        }
-
-        public void start(object stateInfo)
-        {
-            client.StartAsync();
         }
         private Task Log(LogMessage arg)
         {
@@ -223,12 +155,6 @@ namespace Discord_Bot
                 await NumberCountingModule.doWork(msg);
                 return;
             }
-
-            /*if (msg.Content.Contains($"<@{client.CurrentUser.Id}>"))
-            {
-                await ChatGPTModule.HandleMessage(msg);
-                return;
-            }*/
 
             return;
         }
