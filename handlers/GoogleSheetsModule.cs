@@ -52,7 +52,7 @@ namespace Discord_Bot.handlers
             _ = reloadInfos();
         }
 
-        static IDictionary<string, bool> discordAccountsList = new Dictionary<string, bool>();
+        static IDictionary<string, bool> minecraftAccountsList = new Dictionary<string, bool>();
         private static void ReadEntries()
         {
             try
@@ -70,18 +70,18 @@ namespace Discord_Bot.handlers
                         {
                             if (grid.RowData.IndexOf(row) != 0)
                             {
-                                var nick = normalizeNick(row.Values[3].UserEnteredValue.StringValue);
-                                if (!discordAccountsList.ContainsKey(nick))
+                                var nick = normalizeNick(row.Values[4].UserEnteredValue.StringValue);
+                                if (!minecraftAccountsList.ContainsKey(nick))
                                 {
-                                    if (row.Values[3].UserEnteredFormat == null || row.Values[3].UserEnteredFormat.BackgroundColorStyle == null)
+                                    if (row.Values[4].UserEnteredFormat == null || row.Values[4].UserEnteredFormat.BackgroundColorStyle == null)
                                     {
                                         ((SocketTextChannel)Program.instance.edenor.GetChannel(1121791250312478731)).SendMessageAsync("Null color style for " + nick +
                                             "\n Automatically establish that the user is not in the whitelist");
-                                        discordAccountsList.Add(nick, false);
+                                        minecraftAccountsList.Add(nick, false);
                                         continue;
                                     }
                                     else
-                                        discordAccountsList.Add(nick, checkColor(row.Values[3].UserEnteredFormat.BackgroundColorStyle.RgbColor));
+                                        minecraftAccountsList.Add(nick, checkColor(row.Values[4].UserEnteredFormat.BackgroundColorStyle.RgbColor));
                                 }
                             }
                         }
@@ -104,41 +104,21 @@ namespace Discord_Bot.handlers
                 return nick;
             }               
 
-            if (rawNick.ElementAt(0) == '@')
-            {
-                nick = rawNick.Substring(1, rawNick.Length - 1);
-            }
-
-            if (nick.Split(' ').Length > 1)
-            {
-                nick = nick.Split(" ")[0];
-            }
-
             return nick;
         }
 
         private static bool checkColor(Google.Apis.Sheets.v4.Data.Color color)
         {
-            if (Math.Round(color.Red.HasValue ? color.Red.Value : 1, 1, MidpointRounding.AwayFromZero) == 0.4
-                && Math.Round(color.Blue.HasValue ? color.Blue.Value : 1, 1, MidpointRounding.AwayFromZero) == 0.3
-                && Math.Round(color.Green.HasValue ? color.Green.Value : 1, 1, MidpointRounding.AwayFromZero) == 0.7)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return Math.Round(color.Red.Value, 2) == 0.42 && Math.Round(color.Blue.Value, 2) == 0.31 && Math.Round(color.Green.Value, 2) == 0.66;
         }
 
         public static bool checkAccepted(string discordNick)
         {
             try
             {
-                if (discordAccountsList.ContainsKey(discordNick))
+                if (minecraftAccountsList.ContainsKey(discordNick))
                 {
-                    bool def = false;
-                    return discordAccountsList.TryGetValue(discordNick.Trim(), out def);
+                    return minecraftAccountsList.TryGetValue(discordNick.Trim(), out bool def);
                 }
                 return false;
             }
