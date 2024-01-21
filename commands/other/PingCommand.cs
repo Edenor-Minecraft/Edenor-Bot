@@ -11,7 +11,7 @@
         }
         private static async Task MyRatelimitCallback(IRateLimitInfo info)
         {
-            Program.logInfo($"isGlobal: {info.IsGlobal} \n Limit: {info.Limit} \n Remaining: {info.Remaining} \n RetryAfter: {info.RetryAfter} \n Reset: {info.Reset} \n ResetAfter: {info.ResetAfter} \n Bucket: {info.Bucket} \n Lag: {info.Lag} \n Endpoint: {info.Endpoint}");
+            Logger.logInfo($"isGlobal: {info.IsGlobal} \n Limit: {info.Limit} \n Remaining: {info.Remaining} \n RetryAfter: {info.RetryAfter} \n Reset: {info.Reset} \n ResetAfter: {info.ResetAfter} \n Bucket: {info.Bucket} \n Lag: {info.Lag} \n Endpoint: {info.Endpoint}");
         }
     }
 }

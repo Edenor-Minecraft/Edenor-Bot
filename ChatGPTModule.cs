@@ -39,7 +39,7 @@ namespace Discord_Bot
                     }   
                     catch(Exception ex)
                     {
-                        Program.logError("Failed to remove first messages!" + ex.Message + ex.StackTrace);
+                        Logger.logError("Failed to remove first messages!" + ex.Message + ex.StackTrace);
                     }*/
                     
                     return;

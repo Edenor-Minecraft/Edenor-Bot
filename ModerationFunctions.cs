@@ -37,7 +37,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Program.logError("Failed to warn user " + e.Message);
+                Logger.logError("Failed to warn user " + e.Message);
                 return false;
             }
         }
@@ -50,7 +50,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Program.logError("Failed to give role to user " + e.Message);
+                Logger.logError("Failed to give role to user " + e.Message);
                 return false;
             }
         }
@@ -64,7 +64,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Program.logError("Failed to remove role from user " + e.Message);
+                Logger.logError("Failed to remove role from user " + e.Message);
                 return false;
             }
         }
@@ -79,7 +79,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Program.logError("Failed to unTimeout user " + e.Message);
+                Logger.logError("Failed to unTimeout user " + e.Message);
                 return false;
             }
         }
@@ -95,7 +95,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Program.logError("Failed to unban user " + e.Message);
+                Logger.logError("Failed to unban user " + e.Message);
                 return false;
             }
         }
@@ -111,14 +111,14 @@ namespace Discord_Bot
                 }
                 else
                 {
-                    Program.logError("Не удалось отправить причину бана пользователю!");
+                    Logger.logError("Не удалось отправить причину бана пользователю!");
                     Program.instance.edenor.AddBanAsync(iuser, (int)days, reason, options: options);
                 }
                 return true;
             }
             catch(Exception e)
             {
-                Program.logError("Failed to ban user " + e.Message);
+                Logger.logError("Failed to ban user " + e.Message);
                 return false;
             }
         }
@@ -138,7 +138,7 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                Program.logError("Failed to timeout user " + e.Message);
+                Logger.logError("Failed to timeout user " + e.Message);
                 return false;
             }
         }
@@ -156,14 +156,14 @@ namespace Discord_Bot
                 }
                 else
                 {
-                    Program.logError("Не удалось отправить причину кика пользователю!");
+                    Logger.logError("Не удалось отправить причину кика пользователю!");
                     user.KickAsync(reason, options: options);
                 }
                 return true;
             }
             catch (Exception e)
             {
-                Program.logError("Failed to kick user " + e.Message);
+                Logger.logError("Failed to kick user " + e.Message);
                 return false;
             }
         }

@@ -15,7 +15,7 @@ namespace Discord_Bot.handlers
             instance = this;
 
             edenorData = new ServerData(serverId);
-            Program.logInfo($"Successfully created base for {edenorData.Id}");
+            Logger.logInfo($"Successfully created base for {edenorData.Id}");
         }
 
         public async Task initDatabase()
@@ -62,7 +62,7 @@ namespace Discord_Bot.handlers
             }
             else 
             {
-                Program.logInfo("Creating new server data!");
+                Logger.logInfo("Creating new server data!");
 
                 var userList = await Program.instance.client.GetGuild(edenorData.Id).GetUsersAsync().ToListAsync();
 
@@ -125,7 +125,7 @@ namespace Discord_Bot.handlers
             }
             catch (Exception e)
             {
-                Program.logError(e.Message + e.StackTrace);
+                Logger.logError(e.Message + e.StackTrace);
             }
         }
     }

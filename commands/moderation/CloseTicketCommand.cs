@@ -68,7 +68,7 @@ namespace Discord_Bot.commands.moderation
                    x.Content = "Не удалось закрыть жалобу!";
                });
 
-               Program.logError(e.Message + e.StackTrace);
+               Logger.logError(e.Message + e.StackTrace);
             }
         }
     }

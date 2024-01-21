@@ -29,7 +29,7 @@
                 }
                 catch (Exception e)
                 {
-                    await Program.logError("Error while setting up last number and user" + e.Message);
+                    await Logger.logError("Error while setting up last number and user" + e.Message);
                     lastNumber = 0;
                     lastUser = 0;
                 }

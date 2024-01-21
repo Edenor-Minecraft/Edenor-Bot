@@ -68,7 +68,7 @@ namespace Discord_Bot.handlers
             }
             catch (Exception e)
             {
-                Program.logError("Error while setting up commands " + e.Message);
+                Logger.logError("Error while setting up commands " + e.Message);
             }
         }
         public static async Task onCommand(SocketSlashCommand command)

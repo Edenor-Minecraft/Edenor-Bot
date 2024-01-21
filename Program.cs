@@ -18,11 +18,11 @@ namespace Discord_Bot
     class Program
     {
         public static Program instance = null;
-        private DiscordWebhookClient loggerWebhook;
+        public DiscordWebhookClient loggerWebhook;
         public DiscordSocketClient client;
         public SocketGuild edenor;
         public UserDatabase userDatabase;
-        static Timer googleTimer;
+        public static Timer googleTimer;
         static Timer databaseUpdater;
         static void Main(string[] args)
             => new Program().MainAsync().GetAwaiter().GetResult();
@@ -38,16 +38,13 @@ namespace Discord_Bot
             instance = this;
 
             string stream = File.ReadAllText(configDir);
-            config = System.Text.Json.JsonSerializer.Deserialize<BotConfig>(stream);
-
-            config.enableRconFunctions = config.enableRconFunctions != null && config.enableRconFunctions;
+            config = JsonSerializer.Deserialize<BotConfig>(stream);
 
             if (config.loggerWebhookURL != null)
             {
                 loggerWebhook = new DiscordWebhookClient(config.loggerWebhookURL);
             }
 
-            googleTimer = new Timer(GoogleSheetsHelper.timer, new AutoResetEvent(true), 1000, 1800000);
             databaseUpdater = new Timer(UserDatabase.timer, new AutoResetEvent(true), 300000, 300000);
 
             if (config.enableRconFunctions)
@@ -60,7 +57,7 @@ namespace Discord_Bot
                     }
                     catch (Exception e)
                     {
-                        logError(e.Message + e.StackTrace);
+                        Logger.logError(e.Message + e.StackTrace);
                     }
                 }
             }
@@ -74,7 +71,7 @@ namespace Discord_Bot
 
             client = new DiscordSocketClient(socketConfig);
             client.MessageReceived += MessagesHandler;
-            client.Log += Log;
+            client.Log += Logger.Log;
             client.Ready += onReady;
             client.SlashCommandExecuted += CommandsHandler.onCommand;
             client.ButtonExecuted += ButtonsHandler.onButton;
@@ -93,7 +90,7 @@ namespace Discord_Bot
         {
             if (config.token == null)
             {
-                await logError("Invalid token!");
+                await Logger.logError("Invalid token!");
                 Process.GetCurrentProcess().Kill();
             }
 
@@ -101,9 +98,6 @@ namespace Discord_Bot
 
             await client.LoginAsync(TokenType.Bot, token);
             await client.StartAsync();
-
-            GoogleSheetsHelper.setupHelper();
-            await GoogleSheetsHelper.reloadInfos();
 
             await NumberCountingModule.loadAll();
 
@@ -116,6 +110,7 @@ namespace Discord_Bot
             await client.SetActivityAsync(edenGame);
 
             edenor = client.CurrentUser.MutualGuilds.First(); //Easy access to edenor guild
+            GoogleSheetsHelper.setupHelper();
 
             await CommandsHandler.setupCommands();
 
@@ -123,31 +118,10 @@ namespace Discord_Bot
         }
         private async Task onDisconnected(Exception arg)
         {
-            await logError(arg.Message + arg.StackTrace);
+            await Logger.logError(arg.Message + arg.StackTrace);
             await userDatabase.saveData();
         }
-        private Task Log(LogMessage arg)
-        {
-            switch (arg.Severity)
-            {
-                case LogSeverity.Critical:
-                    logCritical(arg.ToString(), arg.Source);
-                    break;
-                case LogSeverity.Error:
-                    logError(arg.ToString(), arg.Source);
-                    break;
-                case LogSeverity.Warning:
-                    logWarn(arg.ToString(), arg.Source);
-                    break;
-                case LogSeverity.Info:
-                    logInfo(arg.ToString(), arg.Source);
-                    break;
-                default:
-                    logTrace(arg.ToString(), arg.Source);
-                    break;
-            }
-            return Task.CompletedTask;
-        }
+        
         private async Task MessagesHandler(SocketMessage msg)
         {
             if (msg.Channel.Id == 1062273336354275348)
@@ -171,79 +145,9 @@ namespace Discord_Bot
             }
             catch (Exception e)
             {
-                logError(e.Message);
+                Logger.logError(e.Message);
                 return Task.CompletedTask;
             }
-        }
-
-        private static string Timestamp => $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}";
-        public static async Task logTrace(object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
-        {
-            msg = msg.ToString();
-            if (instance.loggerWebhook == null)
-            {
-                Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [TRACE]:  {msg}");
-            }
-            else
-            {
-                await instance.loggerWebhook.SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [TRACE]:  {msg}");
-            }        
-        }
-
-        public static async Task logError(object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
-        {
-            msg = msg.ToString();
-            if (instance.loggerWebhook == null)
-            {
-                Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [ERROR]:  {msg}");
-            }
-            else
-            {
-                await instance.loggerWebhook.SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [ERROR]:  {msg}");
-            }
-        }
-
-        public static async Task logInfo(object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
-        {
-            msg = msg.ToString();
-            if (instance.loggerWebhook == null)
-            {
-                Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [INFO]:  {msg}");
-            }
-            else
-            {
-                await instance.loggerWebhook.SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [INFO]:  {msg}");
-            }
-        }
-
-        public static async Task logWarn(object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
-        {
-            if (instance.loggerWebhook == null)
-            {
-                Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [WARN]:  {msg}");
-            }
-            else
-            {
-                await instance.loggerWebhook.SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [WARN]:  {msg}");
-            }
-        }
-
-        public static async Task logCritical (object msg, [CallerMemberName] string caller = "", [CallerLineNumber] int lineNumber = 0)
-        {
-            msg = msg.ToString();
-            if (instance.loggerWebhook == null)
-            {
-                Console.WriteLine($"[{Timestamp}] {caller} line: {lineNumber}: [CRITICAL ERROR]:  {msg}");
-            }
-            else
-            {
-                await instance.loggerWebhook.SendMessageAsync($"[{Timestamp}] {caller} line: {lineNumber}: [CRITICAL ERROR]:  {msg}");
-            }
-        }
-
-        public void timer(object stateInfo)
-        {
-            client.StartAsync();
         }
     }
 

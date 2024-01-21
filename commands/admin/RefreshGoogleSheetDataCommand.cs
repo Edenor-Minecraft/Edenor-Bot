@@ -33,7 +33,7 @@ namespace Discord_Bot.commands.admin
             }
             catch (Exception e)
             {
-                Program.logTrace(e.Message);
+                Logger.logTrace(e.Message);
                 await command.ModifyOriginalResponseAsync(x =>
                 {
                     x.Content = "Не удалось перезагрузить данные таблицы";

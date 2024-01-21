@@ -3,6 +3,7 @@ using Google.Apis.Sheets.v4;
 using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Services;
 using System.Linq;
+using Discord;
 
 namespace Discord_Bot.handlers
 {
@@ -13,8 +14,6 @@ namespace Discord_Bot.handlers
         static readonly string SpreadsheetId = "1iD0heGU3wCvTOVrgc3U5kU4d7u2Hu3cSjaVzZzzaLC4";
         static readonly string sheet = "Ответы на форму (1)";
         static SheetsService service;
-
-        static bool ready = false;
         public static void setupHelper()
         {
             try
@@ -33,25 +32,19 @@ namespace Discord_Bot.handlers
                     ApplicationName = ApplicationName,
                 });
 
-                ready = true;
+                Program.googleTimer = new Timer(timer, new AutoResetEvent(true), 1800000, 1800000);
+                reloadInfos();
             }
             catch (Exception e)
             {
-                _ = Program.logError(e.Message);
+                _ = Logger.logError(e.Message);
             }
         }
 
         public static async Task reloadInfos()
         {
-            if (ready)
-            {
-                _ = Program.logInfo("Refreshing discord accounts infos");
-                ReadEntries();
-            }
-            else
-            {
-                _ = Program.logWarn("GoogleSheets module not initialized!");
-            }
+            _ = Logger.logInfo("Refreshing discord accounts infos");
+            ReadEntries();
         }
 
         public static void timer(object stateInfo)
@@ -75,24 +68,29 @@ namespace Discord_Bot.handlers
                     {
                         foreach (var row in grid.RowData)
                         {
-                            var nick = normalizeNick(row.Values[3].UserEnteredValue.StringValue);
-                            if (!discordAccountsList.ContainsKey(nick))
+                            if (grid.RowData.IndexOf(row) != 0)
                             {
-                                if (row.Values[3].UserEnteredFormat.BackgroundColorStyle == null)
+                                var nick = normalizeNick(row.Values[3].UserEnteredValue.StringValue);
+                                if (!discordAccountsList.ContainsKey(nick))
                                 {
-                                    Program.logError("Null color style for " + nick);
-                                    discordAccountsList.Add(nick, false);
-                                    continue;
+                                    if (row.Values[3].UserEnteredFormat == null || row.Values[3].UserEnteredFormat.BackgroundColorStyle == null)
+                                    {
+                                        ((SocketTextChannel)Program.instance.edenor.GetChannel(1121791250312478731)).SendMessageAsync("Null color style for " + nick +
+                                            "\n Automatically establish that the user is not in the whitelist");
+                                        discordAccountsList.Add(nick, false);
+                                        continue;
+                                    }
+                                    else
+                                        discordAccountsList.Add(nick, checkColor(row.Values[3].UserEnteredFormat.BackgroundColorStyle.RgbColor));
                                 }
-                                discordAccountsList.Add(nick, checkColor(row.Values[3].UserEnteredFormat.BackgroundColorStyle.RgbColor));
-                            }   
+                            }
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                _ = Program.logError(e.Message + e.StackTrace);
+                _ = Logger.logError(e.Message + e.StackTrace);
             }
         }
 
@@ -146,7 +144,7 @@ namespace Discord_Bot.handlers
             }
             catch (Exception e)
             {
-                _ = Program.logError(e.Message + e.StackTrace);
+                _ = Logger.logError(e.Message + e.StackTrace);
                 return false;
             }
         }

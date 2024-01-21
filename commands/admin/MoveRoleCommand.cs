@@ -42,7 +42,7 @@ namespace Discord_Bot.commands.admin
                 await command.ModifyOriginalResponseAsync(x => {
                     x.Content = "Не удалось изменить порядок ролей!";
                 });
-                Program.logError(ex.Message); 
+                Logger.logError(ex.Message); 
             }
         }
     }
