@@ -45,7 +45,7 @@ namespace Discord_Bot
                 loggerWebhook = new DiscordWebhookClient(config.loggerWebhookURL);
             }
 
-            databaseUpdater = new Timer(UserDatabase.timer, new AutoResetEvent(true), 300000, 300000);
+            //databaseUpdater = new Timer(UserDatabase.timer, new AutoResetEvent(true), 300000, 300000);
 
             if (config.enableRconFunctions)
             {
@@ -84,7 +84,7 @@ namespace Discord_Bot
             client.Disconnected += onDisconnected;
             client.GuildMemberUpdated += OnUserUpdated.onUpdate;
 
-            userDatabase = new UserDatabase(677860751695806515);
+            //userDatabase = new UserDatabase(677860751695806515);
         }
         private async Task MainAsync()
         {
@@ -114,12 +114,12 @@ namespace Discord_Bot
 
             await CommandsHandler.setupCommands();
 
-            await userDatabase.initDatabase();
+            //await userDatabase.initDatabase();
         }
         private async Task onDisconnected(Exception arg)
         {
             await Logger.logError(arg.Message + arg.StackTrace);
-            await userDatabase.saveData();
+            //await userDatabase.saveData();
         }
         
         private async Task MessagesHandler(SocketMessage msg)
