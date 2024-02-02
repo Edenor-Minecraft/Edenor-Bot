@@ -82,7 +82,7 @@ namespace Discord_Bot
             client.UserJoined += OnGuildJoin.onJoin;
             client.ThreadCreated += TicketHandler.onNewThread;
             client.Disconnected += onDisconnected;
-            client.GuildMemberUpdated += OnUserUpdated.onUpdate;
+            //client.GuildMemberUpdated += OnUserUpdated.onUpdate;
 
             //userDatabase = new UserDatabase(677860751695806515);
         }
