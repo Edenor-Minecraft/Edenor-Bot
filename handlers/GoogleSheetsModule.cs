@@ -73,7 +73,8 @@ namespace Discord_Bot.handlers
                                 var nick = normalizeNick(row.Values[4].UserEnteredValue.StringValue);
                                 if (!minecraftAccountsList.ContainsKey(nick))
                                 {
-                                    if (row.Values[4].UserEnteredFormat == null || row.Values[4].UserEnteredFormat.BackgroundColorStyle == null)
+                                    if (row.Values[4].UserEnteredFormat == null || row.Values[4].UserEnteredFormat.BackgroundColorStyle == null 
+                                        || row.Values[4].UserEnteredFormat.BackgroundColorStyle.RgbColor == null)
                                     {
                                         ((SocketTextChannel)Program.instance.edenor.GetChannel(1121791250312478731)).SendMessageAsync("Null color style for " + nick +
                                             "\n Automatically establish that the user is not in the whitelist");
